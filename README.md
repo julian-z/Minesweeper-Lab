@@ -1,1 +1,1 @@
-# MinesweeperTrainer
+# Minesweeper Trainer (In-Progress)
