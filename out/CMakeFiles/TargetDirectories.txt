@@ -1,0 +1,4 @@
+/home/ics46/MinesweeperTrainer/out/CMakeFiles/rebuild_cache.dir
+/home/ics46/MinesweeperTrainer/out/CMakeFiles/a.out.gtest.dir
+/home/ics46/MinesweeperTrainer/out/CMakeFiles/edit_cache.dir
+/home/ics46/MinesweeperTrainer/out/CMakeFiles/a.out.app.dir
