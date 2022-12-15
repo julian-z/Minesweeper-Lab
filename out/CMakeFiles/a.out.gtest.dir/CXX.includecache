@@ -14,6 +14,22 @@ iostream
 string
 -
 
+/home/ics46/MinesweeperTrainer/app/Minesweeper.cpp
+Minesweeper.hpp
+/home/ics46/MinesweeperTrainer/app/Minesweeper.hpp
+cstdlib
+-
+ctime
+-
+
+/home/ics46/MinesweeperTrainer/app/Minesweeper.hpp
+vector
+-
+iostream
+-
+string
+-
+
 /home/ics46/MinesweeperTrainer/gtest/tests.cpp
 gtest/gtest.h
 /home/ics46/MinesweeperTrainer/gtest/gtest/gtest.h

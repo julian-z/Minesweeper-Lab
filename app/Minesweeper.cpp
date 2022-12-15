@@ -64,8 +64,9 @@ namespace {
 }
 
 
-Minesweeper::Minesweeper(unsigned initRows, unsigned initCols, unsigned initBombs)
-: numRows{initRows}, numCols{initCols}, numBombs{initBombs}, numFlags{numBombs}, numUnrevealed{(initRows*initCols)-initBombs}
+Minesweeper::Minesweeper(unsigned initRows, unsigned initCols, unsigned initBombs) : 
+numRows{initRows}, numCols{initCols}, numBombs{initBombs}, numFlags{numBombs},
+numNotRevealed{(initRows*initCols)-initBombs}
 {
     // Initialize empty gameBoard
     for (int i=0; i<numRows; ++i) {
@@ -121,7 +122,7 @@ const unsigned& Minesweeper::getBombCount()
 
 bool Minesweeper::checkWin()
 {
-    return numUnrevealed == 0;
+    return numNotRevealed == 0;
 }
 
 
@@ -133,29 +134,35 @@ const std::vector<std::vector<Minesweeper::Cell>>& Minesweeper::getBoard()
 
 void Minesweeper::printBoardAll()
 {
+    int i = 0;
     for (auto& row : gameBoard) {
-        std::cout << '|';
+        std::cout << i << ": |";
         for (int i=0; i<numCols; ++i) {
             if (row[i].bomb) {
                 std::cout << 'B';
             }
-            else if (row[i].num != 0) {
-                std::cout << row[i].num;
-            }
             else {
-                std::cout << " ";
+                std::cout << row[i].num;
             }
             std::cout << '|';
         }
         std::cout << std::endl;
+        i++;
     }
+
+    std::cout << "    ";
+    for (int i=0; i<numCols; ++i) {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
 }
 
 
 void Minesweeper::printBoard()
 {
+    int i = 0;
     for (auto& row : gameBoard) {
-        std::cout << '|';
+        std::cout << i << ": |";
         for (int i=0; i<numCols; ++i) {
             if (row[i].revealed) {
                 std::cout << row[i].num;
@@ -169,7 +176,14 @@ void Minesweeper::printBoard()
             std::cout << '|';
         }
         std::cout << std::endl;
+        i++;
     }
+
+    std::cout << "    ";
+    for (int i=0; i<numCols; ++i) {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
 }
 
 
@@ -197,8 +211,76 @@ bool Minesweeper::removeFlag(unsigned x, unsigned y)
 }
 
 
+void Minesweeper::revealCell(unsigned x, unsigned y)
+{
+    if (!gameBoard[x][y].revealed) {
+        gameBoard[x][y].revealed = true;
+        gameBoard[x][y].flag = false;
+        numNotRevealed--;
+    }
+}
+
+
+void Minesweeper::floodFill(unsigned x, unsigned y) 
+{
+    if (gameBoard[x][y].revealed) {
+        return;
+    }
+
+    revealCell(x, y);
+
+    if (x > 0 && gameBoard[x-1][y].num == 0) {
+        floodFill(x-1, y);
+
+        for (const std::pair<unsigned, unsigned>& coord : getRadiusCoords(x-1, y, numRows, numCols)) {
+            if (gameBoard[coord.first][coord.second].num != 0) {
+                revealCell(coord.first, coord.second);
+            }
+        }
+    }
+    if (y > 0 && gameBoard[x][y-1].num == 0) {
+        floodFill(x, y-1);
+
+        for (const std::pair<unsigned, unsigned>& coord : getRadiusCoords(x, y-1, numRows, numCols)) {
+            if (gameBoard[coord.first][coord.second].num != 0) {
+                revealCell(coord.first, coord.second);
+            }
+        }
+    }
+    if (y < numCols-1 && gameBoard[x][y+1].num == 0) {
+        floodFill(x, y+1);
+
+        for (const std::pair<unsigned, unsigned>& coord : getRadiusCoords(x, y+1, numRows, numCols)) {
+            if (gameBoard[coord.first][coord.second].num != 0) {
+                revealCell(coord.first, coord.second);
+            }
+        }
+    }
+    if (x < numRows-1 && gameBoard[x+1][y].num == 0) {
+        floodFill(x+1, y);
+
+        for (const std::pair<unsigned, unsigned>& coord : getRadiusCoords(x+1, y, numRows, numCols)) {
+            if (gameBoard[coord.first][coord.second].num != 0) {
+                revealCell(coord.first, coord.second);
+            }
+        }
+    }
+}
+
+
 bool Minesweeper::move(unsigned x, unsigned y)
 {
-    return false;
+    if (gameBoard[x][y].bomb) {
+        return false; // Game over
+    }
+    else if (gameBoard[x][y].num != 0) {
+        revealCell(x, y);
+        return true;
+    }
+
+    // Flood Fill Algorithm
+    floodFill(x, y);
+
+    return true;
 }
 

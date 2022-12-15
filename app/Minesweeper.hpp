@@ -61,8 +61,14 @@ private:
     unsigned numCols;
     unsigned numBombs;
     unsigned numFlags;
-    unsigned numUnrevealed;
+    unsigned numNotRevealed;
     std::vector<std::vector<Cell>> gameBoard;
+
+    // Helper function to make cell visible to player
+    void revealCell(unsigned x, unsigned y);
+
+    // Flood fill algorithm for revealing
+    void floodFill(unsigned x, unsigned y);
 };
 
 
