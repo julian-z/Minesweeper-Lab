@@ -12,7 +12,7 @@
 
 
 class Minesweeper {
-private:
+public:
     // Cell struct holds information of each square
     struct Cell
     {
@@ -22,13 +22,6 @@ private:
         bool flag;
     };
 
-    unsigned numRows;
-    unsigned numCols;
-    unsigned numBombs;
-    unsigned numUnrevealed;
-    std::vector<std::vector<Cell>> gameBoard;
-
-public:
     // Constructor initializes gameBoard with given parameters
     Minesweeper(unsigned initRows, unsigned initCols, unsigned initBombs);
     ~Minesweeper() = default;
@@ -44,6 +37,9 @@ public:
     // Prints game board into iostream
     void printBoard();
 
+    // Returns const reference of gameBoard
+    const std::vector<std::vector<Cell>>& getBoard();
+
     // User attempts to reveal [x][y]
     // Returns true if successful, false if bomb
     bool move(unsigned x, unsigned y);
@@ -51,6 +47,13 @@ public:
     // User attempts to place flag at [x][y]
     // Returns true if square is unrevealed
     bool flag(unsigned x, unsigned y);
+
+private:
+    unsigned numRows;
+    unsigned numCols;
+    unsigned numBombs;
+    unsigned numUnrevealed;
+    std::vector<std::vector<Cell>> gameBoard;
 };
 
 

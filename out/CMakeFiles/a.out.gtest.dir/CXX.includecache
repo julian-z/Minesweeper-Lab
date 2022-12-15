@@ -19,6 +19,8 @@ Minesweeper.hpp
 /home/ics46/MinesweeperTrainer/app/Minesweeper.hpp
 cstdlib
 -
+ctime
+-
 
 /home/ics46/MinesweeperTrainer/app/Minesweeper.hpp
 vector
@@ -26,10 +28,6 @@ vector
 iostream
 -
 string
--
-
-/home/ics46/MinesweeperTrainer/gtest/gtestmain.cpp
-gtest/gtest.h
 -
 
 /home/ics46/MinesweeperTrainer/gtest/tests.cpp

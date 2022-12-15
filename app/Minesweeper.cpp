@@ -11,7 +11,7 @@
 // Helper functions
 namespace {
     std::vector<std::pair<unsigned, unsigned>> getRadiusCoords(const unsigned& x, const unsigned& y, 
-                                                                        const unsigned& numRows, const unsigned& numCols)
+                                                                const unsigned& numRows, const unsigned& numCols)
     {
         std::vector<std::pair<unsigned, unsigned>> coords;
 
@@ -122,6 +122,12 @@ const unsigned& Minesweeper::getBombCount()
 bool Minesweeper::checkWin()
 {
     return numUnrevealed == 0;
+}
+
+
+const std::vector<std::vector<Minesweeper::Cell>>& Minesweeper::getBoard()
+{
+    return gameBoard;
 }
 
 
