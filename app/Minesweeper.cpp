@@ -65,7 +65,7 @@ namespace {
 
 
 Minesweeper::Minesweeper(unsigned initRows, unsigned initCols, unsigned initBombs)
-: numRows{initRows}, numCols{initCols}, numBombs{initBombs}, numUnrevealed{(initRows*initCols)-initBombs}
+: numRows{initRows}, numCols{initCols}, numBombs{initBombs}, numFlags{numBombs}, numUnrevealed{(initRows*initCols)-initBombs}
 {
     // Initialize empty gameBoard
     for (int i=0; i<numRows; ++i) {
@@ -131,7 +131,7 @@ const std::vector<std::vector<Minesweeper::Cell>>& Minesweeper::getBoard()
 }
 
 
-void Minesweeper::printBoard()
+void Minesweeper::printBoardAll()
 {
     for (auto& row : gameBoard) {
         std::cout << '|';
@@ -152,13 +152,52 @@ void Minesweeper::printBoard()
 }
 
 
-bool Minesweeper::move(unsigned x, unsigned y)
+void Minesweeper::printBoard()
 {
-    return false;
+    for (auto& row : gameBoard) {
+        std::cout << '|';
+        for (int i=0; i<numCols; ++i) {
+            if (row[i].revealed) {
+                std::cout << row[i].num;
+            }
+            else if (row[i].flag) {
+                std::cout << 'F';
+            }
+            else {
+                std::cout << " ";
+            }
+            std::cout << '|';
+        }
+        std::cout << std::endl;
+    }
 }
 
 
 bool Minesweeper::flag(unsigned x, unsigned y)
+{
+    if (numFlags > 0 && !gameBoard[x][y].flag && !gameBoard[x][y].revealed) {
+        gameBoard[x][y].flag = true;
+        numFlags--;
+        return true;
+    }
+
+    return false;
+}
+
+
+bool Minesweeper::removeFlag(unsigned x, unsigned y)
+{
+    if (gameBoard[x][y].flag) {
+        gameBoard[x][y].flag = false;
+        numFlags++;
+        return true;
+    }
+
+    return false;
+}
+
+
+bool Minesweeper::move(unsigned x, unsigned y)
 {
     return false;
 }

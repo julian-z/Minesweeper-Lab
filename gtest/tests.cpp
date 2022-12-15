@@ -108,4 +108,35 @@ namespace {
     }
 
 
+    TEST(TDD, TestingFlags)
+    {
+        Minesweeper ms{8, 10, 5};
+        ms.flag(1, 1);
+        ms.flag(2, 2);
+        ms.flag(3, 3);
+        ms.flag(4, 4);
+        ms.flag(5, 5);
+        auto board = ms.getBoard();
+
+        EXPECT_FALSE( ms.flag(3,1) ); // No more flags
+        EXPECT_TRUE( board[1][1].flag );
+        EXPECT_TRUE( board[2][2].flag );
+        EXPECT_TRUE( board[3][3].flag );
+        EXPECT_TRUE( board[4][4].flag );
+        EXPECT_TRUE( board[5][5].flag );
+
+        ms.removeFlag(1, 1);
+        ms.removeFlag(2, 2);
+        board = ms.getBoard();
+        EXPECT_FALSE( board[1][1].flag );
+        EXPECT_FALSE( board[2][2].flag );
+        EXPECT_TRUE( board[3][3].flag );
+        EXPECT_TRUE( board[4][4].flag );
+        EXPECT_TRUE( board[5][5].flag );
+
+        EXPECT_FALSE( ms.flag(3, 3) ); // Flag already placed there
+        EXPECT_FALSE( ms.removeFlag(1, 1) ); // Flag not there
+    }
+
+
 }

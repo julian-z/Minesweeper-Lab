@@ -34,24 +34,33 @@ public:
     // Returns true if all non-bomb squares are revealed
     bool checkWin();
 
+    // Prints game board into iostream (including unrevealed cells)
+    void printBoardAll();
+
     // Prints game board into iostream
     void printBoard();
 
     // Returns const reference of gameBoard
     const std::vector<std::vector<Cell>>& getBoard();
 
+    // User attempts to place flag at [x][y]
+    // Returns true if square is unrevealed, flag is not already placed,
+    // and numFlags > 0
+    bool flag(unsigned x, unsigned y);
+
+    // User attempts to remove fag at [x][y]
+    // Returns true if there was a flag
+    bool removeFlag(unsigned x, unsigned y);
+
     // User attempts to reveal [x][y]
     // Returns true if successful, false if bomb
     bool move(unsigned x, unsigned y);
-
-    // User attempts to place flag at [x][y]
-    // Returns true if square is unrevealed
-    bool flag(unsigned x, unsigned y);
 
 private:
     unsigned numRows;
     unsigned numCols;
     unsigned numBombs;
+    unsigned numFlags;
     unsigned numUnrevealed;
     std::vector<std::vector<Cell>> gameBoard;
 };
