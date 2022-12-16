@@ -254,39 +254,15 @@ void Minesweeper::floodFill(unsigned x, unsigned y)
 
     if (x > 0 && gameBoard[x-1][y].num == 0) {
         floodFill(x-1, y);
-
-        for (const std::pair<unsigned, unsigned>& coord : getRadiusCoords(x-1, y, numRows, numCols)) {
-            if (gameBoard[coord.first][coord.second].num != 0) {
-                revealCell(coord.first, coord.second);
-            }
-        }
     }
     if (y > 0 && gameBoard[x][y-1].num == 0) {
         floodFill(x, y-1);
-
-        for (const std::pair<unsigned, unsigned>& coord : getRadiusCoords(x, y-1, numRows, numCols)) {
-            if (gameBoard[coord.first][coord.second].num != 0) {
-                revealCell(coord.first, coord.second);
-            }
-        }
     }
     if (y < numCols-1 && gameBoard[x][y+1].num == 0) {
         floodFill(x, y+1);
-
-        for (const std::pair<unsigned, unsigned>& coord : getRadiusCoords(x, y+1, numRows, numCols)) {
-            if (gameBoard[coord.first][coord.second].num != 0) {
-                revealCell(coord.first, coord.second);
-            }
-        }
     }
     if (x < numRows-1 && gameBoard[x+1][y].num == 0) {
         floodFill(x+1, y);
-
-        for (const std::pair<unsigned, unsigned>& coord : getRadiusCoords(x+1, y, numRows, numCols)) {
-            if (gameBoard[coord.first][coord.second].num != 0) {
-                revealCell(coord.first, coord.second);
-            }
-        }
     }
 }
 
