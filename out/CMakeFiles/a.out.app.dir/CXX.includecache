@@ -6,6 +6,14 @@
 
 #IncludeRegexTransform: 
 
+/home/ics46/MinesweeperTrainer/app/Minesweeper.cpp
+Minesweeper.hpp
+/home/ics46/MinesweeperTrainer/app/Minesweeper.hpp
+cstdlib
+-
+ctime
+-
+
 /home/ics46/MinesweeperTrainer/app/Minesweeper.hpp
 vector
 -
@@ -13,8 +21,4 @@ iostream
 -
 string
 -
-
-/home/ics46/MinesweeperTrainer/app/main.cpp
-Minesweeper.hpp
-/home/ics46/MinesweeperTrainer/app/Minesweeper.hpp
 

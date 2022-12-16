@@ -114,6 +114,12 @@ const unsigned& Minesweeper::getCols()
 }
 
 
+const unsigned& Minesweeper::getFlags()
+{
+    return numFlags;
+}
+
+
 const unsigned& Minesweeper::getBombCount()
 {
     return numBombs;
@@ -134,9 +140,15 @@ const std::vector<std::vector<Minesweeper::Cell>>& Minesweeper::getBoard()
 
 void Minesweeper::printBoardAll()
 {
+    std::cout << "   ";
+    for (int i=0; i<numCols; ++i) {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
+
     int i = 0;
     for (auto& row : gameBoard) {
-        std::cout << i << ": |";
+        std::cout << i << " |";
         for (int i=0; i<numCols; ++i) {
             if (row[i].bomb) {
                 std::cout << 'B';
@@ -146,11 +158,11 @@ void Minesweeper::printBoardAll()
             }
             std::cout << '|';
         }
-        std::cout << std::endl;
+        std::cout << " " << i << std::endl;
         i++;
     }
 
-    std::cout << "    ";
+    std::cout << "   ";
     for (int i=0; i<numCols; ++i) {
         std::cout << i << " ";
     }
@@ -160,9 +172,15 @@ void Minesweeper::printBoardAll()
 
 void Minesweeper::printBoard()
 {
+    std::cout << "   ";
+    for (int i=0; i<numCols; ++i) {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
+
     int i = 0;
     for (auto& row : gameBoard) {
-        std::cout << i << ": |";
+        std::cout << i << " |";
         for (int i=0; i<numCols; ++i) {
             if (row[i].revealed) {
                 std::cout << row[i].num;
@@ -175,11 +193,11 @@ void Minesweeper::printBoard()
             }
             std::cout << '|';
         }
-        std::cout << std::endl;
+        std::cout << " " << i << std::endl;
         i++;
     }
 
-    std::cout << "    ";
+    std::cout << "   ";
     for (int i=0; i<numCols; ++i) {
         std::cout << i << " ";
     }
@@ -228,6 +246,11 @@ void Minesweeper::floodFill(unsigned x, unsigned y)
     }
 
     revealCell(x, y);
+    for (const std::pair<unsigned, unsigned>& coord : getRadiusCoords(x, y, numRows, numCols)) {
+        if (gameBoard[coord.first][coord.second].num != 0) {
+            revealCell(coord.first, coord.second);
+        }
+    }
 
     if (x > 0 && gameBoard[x-1][y].num == 0) {
         floodFill(x-1, y);

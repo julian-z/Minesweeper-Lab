@@ -26,9 +26,10 @@ public:
     Minesweeper(unsigned initRows, unsigned initCols, unsigned initBombs);
     ~Minesweeper() = default;
 
-    // Return number of rows, cols, and bombs
+    // Return number of rows, cols, flags, bombs
     const unsigned& getRows();
     const unsigned& getCols();
+    const unsigned& getFlags();
     const unsigned& getBombCount();
 
     // Returns true if all non-bomb squares are revealed

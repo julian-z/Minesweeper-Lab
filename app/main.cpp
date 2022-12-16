@@ -18,7 +18,7 @@ int main()
     unsigned bombs;
     std::cout << "Number of rows: ";
     std::cin >> rows;
-    std::cout << "Number of cols: ";
+    std::cout << "Number of columns: ";
     std::cin >> cols;
     std::cout << "Number of bombs: ";
     std::cin >> bombs;
