@@ -23,6 +23,22 @@ std::unordered_map<unsigned, const char*> NUMBER_MAP {
 };
 
 
+void drawStats(SDL_Renderer* renderer, const Minesweeper& game) 
+{
+    // Draw logo at top
+    // ...
+
+    // Draw flag count
+    // ...
+
+    // Draw time
+    // ...
+
+    // Draw high score
+    // ...
+}
+
+
 void drawGameBoardAll(SDL_Renderer* renderer, const std::vector<std::vector<Minesweeper::Cell>>& board) 
 {
     int size = 50;
@@ -146,7 +162,7 @@ void drawGameBoard(SDL_Renderer* renderer, const std::vector<std::vector<Mineswe
 
 void drawBackground(SDL_Renderer* renderer)
 {
-    // int size = 50;
+    // int size = 50; // For scaling purposes
     int size = 25;
     int x = 0;
     int y = 0;
@@ -263,6 +279,7 @@ int main(int argc, char *argv[])
         // ---------------------------------------
         if (gameInProgress) {
             drawGameBoard(renderer, game.getBoard());
+            drawStats(renderer, game);
         }
         else {
             drawGameBoardAll(renderer, game.getBoard());
