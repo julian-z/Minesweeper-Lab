@@ -1,1 +1,0 @@
-/usr/bin/clang++     CMakeFiles/a.out.gtest.dir/gtest/gtestmain.cpp.o CMakeFiles/a.out.gtest.dir/gtest/tests.cpp.o CMakeFiles/a.out.gtest.dir/app/Minesweeper.cpp.o  -o bin/a.out.gtest  -lpthread -lc++ -lgtest -lgtest_main 

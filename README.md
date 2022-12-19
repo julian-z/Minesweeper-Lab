@@ -1,1 +1,1 @@
-# Minesweeper Trainer (In-Progress)
+# Minesweeper Lab (In-Progress)
