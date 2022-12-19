@@ -102,43 +102,43 @@ numNotRevealed{(initRows*initCols)-initBombs}
 }
 
 
-const unsigned& Minesweeper::getRows()
+const unsigned& Minesweeper::getRows() const
 {
     return numRows;
 }
 
 
-const unsigned& Minesweeper::getCols()
+const unsigned& Minesweeper::getCols() const
 {
     return numCols;
 }
 
 
-const unsigned& Minesweeper::getFlags()
+const unsigned& Minesweeper::getFlags() const
 {
     return numFlags;
 }
 
 
-const unsigned& Minesweeper::getBombCount()
+const unsigned& Minesweeper::getBombCount() const
 {
     return numBombs;
 }
 
 
-bool Minesweeper::checkWin()
+bool Minesweeper::checkWin() const
 {
     return numNotRevealed == 0;
 }
 
 
-const std::vector<std::vector<Minesweeper::Cell>>& Minesweeper::getBoard()
+const std::vector<std::vector<Minesweeper::Cell>>& Minesweeper::getBoard() const
 {
     return gameBoard;
 }
 
 
-void Minesweeper::printBoardAll()
+void Minesweeper::printBoardAll() const
 {
     std::cout << "   ";
     for (int i=0; i<numCols; ++i) {
@@ -170,7 +170,7 @@ void Minesweeper::printBoardAll()
 }
 
 
-void Minesweeper::printBoard()
+void Minesweeper::printBoard() const
 {
     std::cout << "   ";
     for (int i=0; i<numCols; ++i) {

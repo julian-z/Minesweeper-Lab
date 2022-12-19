@@ -23,13 +23,42 @@ std::unordered_map<unsigned, const char*> NUMBER_MAP {
 };
 
 
-void drawStats(SDL_Renderer* renderer, const Minesweeper& game) 
+void drawStats(SDL_Renderer* renderer, const Minesweeper& game, TTF_Font* font) 
 {
     // Draw logo at top
-    // ...
+    SDL_Texture* logo = IMG_LoadTexture(renderer, "textures/minesweeperlablogo.png");
+    SDL_Rect logo_rect{WIDTH/4, 0, 365, 100};
+    SDL_RenderCopy(renderer, logo, NULL, &logo_rect);
+    SDL_DestroyTexture(logo);
+    
+    // Draw flag
+    SDL_Texture* flag = IMG_LoadTexture(renderer, "textures/graysquareflag.png");
+    SDL_Rect flag_rect{WIDTH/2-50, HEIGHT-75, 50, 50};
+    SDL_RenderCopy(renderer, flag, NULL, &flag_rect);
+    SDL_DestroyTexture(flag);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_Rect outline{WIDTH/2-50, HEIGHT-75, 50, 50};
+    SDL_RenderDrawRect(renderer, &outline);
 
     // Draw flag count
-    // ...
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_Rect textBg{WIDTH/2, HEIGHT-75, 50, 50};
+    SDL_RenderFillRect(renderer, &textBg);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_Rect textBgOutline{WIDTH/2, HEIGHT-75, 50, 50};
+    SDL_RenderDrawRect(renderer, &textBgOutline);
+    SDL_Surface* flagCount = TTF_RenderText_Solid(font, std::to_string(game.getFlags()).c_str(), {0, 0, 0});
+    SDL_Texture* countTexture = SDL_CreateTextureFromSurface(renderer, flagCount);
+    SDL_Rect countRect;
+    if (game.getFlags() > 9) {
+        countRect = SDL_Rect{WIDTH/2+2, HEIGHT-75, 50, 50};
+    }
+    else {
+        countRect = SDL_Rect{WIDTH/2+14, HEIGHT-75, 25, 50};
+    }
+    SDL_RenderCopy(renderer, countTexture, NULL, &countRect);
+    SDL_FreeSurface(flagCount);
+    SDL_DestroyTexture(countTexture);
 
     // Draw time
     // ...
@@ -221,6 +250,8 @@ std::pair<unsigned, unsigned> getCellCoords(const int& x, const int& y)
 int main(int argc, char *argv[])
 {
     SDL_Init(SDL_INIT_EVERYTHING);
+    TTF_Init();
+    TTF_Font* Arial = TTF_OpenFont("pixelated.ttf", 64);
 
     SDL_Window* window = SDL_CreateWindow("Minesweeper Lab", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -230,7 +261,7 @@ int main(int argc, char *argv[])
 
     unsigned rows = 8;
     unsigned cols = 12;
-    unsigned bombs = 15;
+    unsigned bombs = 12;
     Minesweeper game{rows, cols, bombs};
     bool gameInProgress = true;
 
@@ -278,10 +309,17 @@ int main(int argc, char *argv[])
 
         // ---------------------------------------
         if (gameInProgress) {
+            SDL_Texture* shadow = IMG_LoadTexture(renderer, "textures/boardshadow.png");
+            SDL_RenderCopy(renderer, shadow, NULL, NULL);
+            SDL_DestroyTexture(shadow);
             drawGameBoard(renderer, game.getBoard());
-            drawStats(renderer, game);
+            
+            drawStats(renderer, game, Arial);
         }
         else {
+            SDL_Texture* shadow = IMG_LoadTexture(renderer, "textures/boardshadow.png");
+            SDL_RenderCopy(renderer, shadow, NULL, NULL);
+            SDL_DestroyTexture(shadow);
             drawGameBoardAll(renderer, game.getBoard());
         }
         // ---------------------------------------
@@ -289,6 +327,8 @@ int main(int argc, char *argv[])
         SDL_RenderPresent(renderer);
     }
     
+    TTF_CloseFont(Arial);
+    TTF_Quit();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

@@ -27,22 +27,22 @@ public:
     ~Minesweeper() = default;
 
     // Return number of rows, cols, flags, bombs
-    const unsigned& getRows();
-    const unsigned& getCols();
-    const unsigned& getFlags();
-    const unsigned& getBombCount();
+    const unsigned& getRows() const;
+    const unsigned& getCols() const;
+    const unsigned& getFlags() const;
+    const unsigned& getBombCount() const;
 
     // Returns true if all non-bomb squares are revealed
-    bool checkWin();
+    bool checkWin() const;
 
     // Prints game board into iostream (including unrevealed cells)
-    void printBoardAll();
+    void printBoardAll() const;
 
     // Prints game board into iostream
-    void printBoard();
+    void printBoard() const;
 
     // Returns const reference of gameBoard
-    const std::vector<std::vector<Cell>>& getBoard();
+    const std::vector<std::vector<Cell>>& getBoard() const;
 
     // User attempts to place flag at [x][y]
     // Returns true if square is unrevealed, flag is not already placed,
