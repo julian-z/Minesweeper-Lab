@@ -229,6 +229,12 @@ bool Minesweeper::removeFlag(unsigned x, unsigned y)
 }
 
 
+bool Minesweeper::findFlag(unsigned x, unsigned y) 
+{
+    return gameBoard[x][y].flag;
+}
+
+
 void Minesweeper::revealCell(unsigned x, unsigned y)
 {
     if (!gameBoard[x][y].revealed) {

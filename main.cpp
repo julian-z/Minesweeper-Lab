@@ -10,16 +10,72 @@
 #include "Minesweeper.hpp"
 
 const int WIDTH = 800, HEIGHT = 600;
-std::unordered_map<unsigned, SDL_Color> COLOR_MAP{
-    {1, SDL_Color{0, 255, 0}},
-    {2, SDL_Color{0, 0, 255}},
-    {3, SDL_Color{255, 0, 0}},
-    {4, SDL_Color{255, 0, 255}},
-    {5, SDL_Color{0, 255, 255}},
-    {6, SDL_Color{255, 255, 0}},
-    {7, SDL_Color{0, 0, 0}},
-    {8, SDL_Color{50, 50, 50}}
+
+std::unordered_map<unsigned, const char*> NUMBER_MAP {
+    {1, "textures/1.png"},
+    {2, "textures/2.png"},
+    {3, "textures/3.png"},
+    {4, "textures/4.png"},
+    {5, "textures/5.png"},
+    {6, "textures/6.png"},
+    {7, "textures/7.png"},
+    {8, "textures/8.png"}
 };
+
+
+void drawGameBoardAll(SDL_Renderer* renderer, const std::vector<std::vector<Minesweeper::Cell>>& board) 
+{
+    int size = 50;
+    int start_x = 100;
+    int x = start_x;
+    int y = 100;
+
+    for (auto& row : board) {
+        for (auto& cell : row) {
+            if (cell.bomb) {
+                // Draw gray square with bomb
+                SDL_Texture* square = IMG_LoadTexture(renderer, "textures/graysquarebomb.png");
+                SDL_Rect square_rect{x, y, size, size};
+                SDL_RenderCopy(renderer, square, NULL, &square_rect);
+                SDL_DestroyTexture(square);
+
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                SDL_Rect outline{x, y, size, size};
+                SDL_RenderDrawRect(renderer, &outline);
+            }
+            else {
+                // Draw light gray square with number (ignore if 0)
+                if (cell.num != 0) {
+                    SDL_SetRenderDrawColor(renderer, 192, 192, 192, 255);
+                    SDL_Rect rect{x, y, size, size};
+                    SDL_RenderFillRect(renderer, &rect);
+
+                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                    SDL_Rect outline{x, y, size, size};
+                    SDL_RenderDrawRect(renderer, &outline);
+
+                    // Draw number
+                    SDL_Texture* num = IMG_LoadTexture(renderer, NUMBER_MAP[cell.num]);
+                    SDL_Rect num_rect{x, y, size, size};
+                    SDL_RenderCopy(renderer, num, NULL, &num_rect);
+                    SDL_DestroyTexture(num);
+                }
+                else {
+                    SDL_SetRenderDrawColor(renderer, 192, 192, 192, 255);
+                    SDL_Rect rect{x, y, size, size};
+                    SDL_RenderFillRect(renderer, &rect);
+
+                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                    SDL_Rect outline{x, y, size, size};
+                    SDL_RenderDrawRect(renderer, &outline);
+                }
+            }
+            x += size;
+        }
+        x = start_x;
+        y += size;
+    }
+}
 
 
 void drawGameBoard(SDL_Renderer* renderer, const std::vector<std::vector<Minesweeper::Cell>>& board) 
@@ -33,9 +89,10 @@ void drawGameBoard(SDL_Renderer* renderer, const std::vector<std::vector<Mineswe
         for (auto& cell : row) {
             if (!cell.revealed && !cell.flag) {
                 // Draw gray square
-                SDL_SetRenderDrawColor(renderer, 192, 192, 192, 255);
-                SDL_Rect rect{x, y, size, size};
-                SDL_RenderFillRect(renderer, &rect);
+                SDL_Texture* square = IMG_LoadTexture(renderer, "textures/graysquare.png");
+                SDL_Rect square_rect{x, y, size, size};
+                SDL_RenderCopy(renderer, square, NULL, &square_rect);
+                SDL_DestroyTexture(square);
 
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
                 SDL_Rect outline{x, y, size, size};
@@ -43,18 +100,19 @@ void drawGameBoard(SDL_Renderer* renderer, const std::vector<std::vector<Mineswe
             }
             else if (!cell.revealed && cell.flag) {
                 // Draw gray square with flag
-                SDL_SetRenderDrawColor(renderer, 192, 192, 192, 255);
-                SDL_Rect rect{x, y, size, size};
-                SDL_RenderFillRect(renderer, &rect);
+                SDL_Texture* square = IMG_LoadTexture(renderer, "textures/graysquareflag.png");
+                SDL_Rect square_rect{x, y, size, size};
+                SDL_RenderCopy(renderer, square, NULL, &square_rect);
+                SDL_DestroyTexture(square);
 
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
                 SDL_Rect outline{x, y, size, size};
                 SDL_RenderDrawRect(renderer, &outline);
             }
             else {
-                // Draw dark gray square with number (ignore if 0)
+                // Draw light gray square with number (ignore if 0)
                 if (cell.num != 0) {
-                    SDL_SetRenderDrawColor(renderer, 105, 105, 105, 255);
+                    SDL_SetRenderDrawColor(renderer, 192, 192, 192, 255);
                     SDL_Rect rect{x, y, size, size};
                     SDL_RenderFillRect(renderer, &rect);
 
@@ -63,18 +121,13 @@ void drawGameBoard(SDL_Renderer* renderer, const std::vector<std::vector<Mineswe
                     SDL_RenderDrawRect(renderer, &outline);
 
                     // Draw number
-                    TTF_Font* Arial = TTF_OpenFont("arial.ttf", 24);
-                    SDL_Color Color = COLOR_MAP[cell.num];
-                    SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Arial, std::to_string(cell.num).c_str(), Color);
-                    SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
-                    SDL_Rect Message_rect{x, y, size, size};
-                    SDL_RenderCopy(renderer, Message, NULL, &Message_rect);
-                    SDL_FreeSurface(surfaceMessage);
-                    SDL_DestroyTexture(Message);
-                    TTF_CloseFont(Arial);
+                    SDL_Texture* num = IMG_LoadTexture(renderer, NUMBER_MAP[cell.num]);
+                    SDL_Rect num_rect{x, y, size, size};
+                    SDL_RenderCopy(renderer, num, NULL, &num_rect);
+                    SDL_DestroyTexture(num);
                 }
                 else {
-                    SDL_SetRenderDrawColor(renderer, 105, 105, 105, 255);
+                    SDL_SetRenderDrawColor(renderer, 192, 192, 192, 255);
                     SDL_Rect rect{x, y, size, size};
                     SDL_RenderFillRect(renderer, &rect);
 
@@ -93,7 +146,8 @@ void drawGameBoard(SDL_Renderer* renderer, const std::vector<std::vector<Mineswe
 
 void drawBackground(SDL_Renderer* renderer)
 {
-    int size = 50;
+    // int size = 50;
+    int size = 25;
     int x = 0;
     int y = 0;
     bool dark_green = true;
@@ -151,7 +205,6 @@ std::pair<unsigned, unsigned> getCellCoords(const int& x, const int& y)
 int main(int argc, char *argv[])
 {
     SDL_Init(SDL_INIT_EVERYTHING);
-    TTF_Init();
 
     SDL_Window* window = SDL_CreateWindow("Minesweeper Lab", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -163,6 +216,7 @@ int main(int argc, char *argv[])
     unsigned cols = 12;
     unsigned bombs = 15;
     Minesweeper game{rows, cols, bombs};
+    bool gameInProgress = true;
 
     while (running)
     {
@@ -173,10 +227,32 @@ int main(int argc, char *argv[])
                 break;
             }
             else if (windowEvent.type == SDL_MOUSEBUTTONDOWN) {
-                // Make move on cell if mouse is in grid
-                if ( (100 <= windowEvent.motion.x && windowEvent.motion.x <= 700) && (100 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
-                    auto coords = getCellCoords(windowEvent.motion.x, windowEvent.motion.y);
-                    game.move(coords.first, coords.second);
+                if (gameInProgress) {
+                    // Make move (or flag) on cell if mouse is in grid
+                    if (windowEvent.button.button == SDL_BUTTON_LEFT) {
+                        if ( (100 <= windowEvent.motion.x && windowEvent.motion.x <= 700) && (100 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
+                            auto coords = getCellCoords(windowEvent.motion.x, windowEvent.motion.y);
+
+                            if (!game.move(coords.first, coords.second)) {
+                                gameInProgress = false;
+                            }
+                            else if (game.checkWin()) {
+                                gameInProgress = false;
+                            }
+                        }
+                    }
+                    else if (windowEvent.button.button == SDL_BUTTON_RIGHT) {
+                        if ( (100 <= windowEvent.motion.x && windowEvent.motion.x <= 700) && (100 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
+                            auto coords = getCellCoords(windowEvent.motion.x, windowEvent.motion.y);
+
+                            if (game.findFlag(coords.first, coords.second)) {
+                                game.removeFlag(coords.first, coords.second);
+                            }
+                            else {
+                                game.flag(coords.first, coords.second);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -185,7 +261,12 @@ int main(int argc, char *argv[])
         drawBackground(renderer); // Checkerboard
 
         // ---------------------------------------
-        drawGameBoard(renderer, game.getBoard());
+        if (gameInProgress) {
+            drawGameBoard(renderer, game.getBoard());
+        }
+        else {
+            drawGameBoardAll(renderer, game.getBoard());
+        }
         // ---------------------------------------
 
         SDL_RenderPresent(renderer);
@@ -194,7 +275,6 @@ int main(int argc, char *argv[])
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
-    TTF_Quit();
     
     return 0;
 }

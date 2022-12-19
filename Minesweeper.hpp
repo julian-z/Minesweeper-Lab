@@ -49,9 +49,12 @@ public:
     // and numFlags > 0
     bool flag(unsigned x, unsigned y);
 
-    // User attempts to remove fag at [x][y]
+    // User attempts to remove flag at [x][y]
     // Returns true if there was a flag
     bool removeFlag(unsigned x, unsigned y);
+
+    // Returns true if there was a flag
+    bool findFlag(unsigned x, unsigned y);
 
     // User attempts to reveal [x][y]
     // Returns true if successful, false if bomb
