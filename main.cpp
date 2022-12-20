@@ -9,6 +9,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 #include "Minesweeper.hpp"
+#include "NormalGame.cpp"
 
 const int WIDTH = 800;
 const int HEIGHT = 600;
@@ -22,206 +23,6 @@ std::unordered_map<unsigned, const char*> NUMBER_MAP {
     {7, "textures/7.png"},
     {8, "textures/8.png"}
 };
-
-
-void drawStats(SDL_Renderer* renderer, const Minesweeper& game, TTF_Font* font, int startTick) 
-{
-    // Draw logo at top
-    SDL_Texture* logo = IMG_LoadTexture(renderer, "textures/minesweeperlablogo.png");
-    SDL_Rect logo_rect{WIDTH/4, 0, 365, 100};
-    SDL_RenderCopy(renderer, logo, NULL, &logo_rect);
-    SDL_DestroyTexture(logo);
-    
-    // Draw flag
-    SDL_Texture* flag = IMG_LoadTexture(renderer, "textures/graysquareflag.png");
-    SDL_Rect flag_rect{WIDTH/2-50, HEIGHT-75, 50, 50};
-    SDL_RenderCopy(renderer, flag, NULL, &flag_rect);
-    SDL_DestroyTexture(flag);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_Rect outline{WIDTH/2-50, HEIGHT-75, 50, 50};
-    SDL_RenderDrawRect(renderer, &outline);
-
-    // Draw flag count
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_Rect textBg{WIDTH/2, HEIGHT-75, 50, 50};
-    SDL_RenderFillRect(renderer, &textBg);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_Rect textBgOutline{WIDTH/2, HEIGHT-75, 50, 50};
-    SDL_RenderDrawRect(renderer, &textBgOutline);
-    SDL_Surface* flagCount = TTF_RenderText_Solid(font, std::to_string(game.getFlags()).c_str(), {0, 0, 0});
-    SDL_Texture* countTexture = SDL_CreateTextureFromSurface(renderer, flagCount);
-    SDL_Rect countRect;
-    if (game.getFlags() > 9) {
-        countRect = SDL_Rect{WIDTH/2+2, HEIGHT-75, 50, 50};
-    }
-    else {
-        countRect = SDL_Rect{WIDTH/2+14, HEIGHT-75, 25, 50};
-    }
-    SDL_RenderCopy(renderer, countTexture, NULL, &countRect);
-    SDL_FreeSurface(flagCount);
-    SDL_DestroyTexture(countTexture);
-
-    // Draw time
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_Rect timeRectBg{100, HEIGHT-75, 200, 50};
-    SDL_RenderFillRect(renderer, &timeRectBg);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_Rect timeRectOutline{100, HEIGHT-75, 200, 50};
-    SDL_RenderDrawRect(renderer, &timeRectOutline);
-    SDL_Texture* timeLogo = IMG_LoadTexture(renderer, "textures/timer.png");
-    SDL_Rect timeLogoRect{100, HEIGHT-75, 50, 50};
-    SDL_RenderCopy(renderer, timeLogo, NULL, &timeLogoRect);
-    SDL_DestroyTexture(timeLogo);
-    if (startTick == 0) {
-        // Draw 0
-        SDL_Surface* timer = TTF_RenderText_Solid(font, "0", {0, 0, 0});
-        SDL_Texture* timerTexture = SDL_CreateTextureFromSurface(renderer, timer);
-        SDL_Rect timerRect{164, HEIGHT-75, 25, 50};
-        SDL_RenderCopy(renderer, timerTexture, NULL, &timerRect);
-        SDL_FreeSurface(timer);
-        SDL_DestroyTexture(timerTexture);
-    }
-    else {
-        // Draw (getTicks()-startTick)/1000
-        int currentTime = (SDL_GetTicks64()-startTick)/1000;
-        SDL_Rect timerRect;
-        if (currentTime > 9) {
-            timerRect = SDL_Rect{164, HEIGHT-75, 50, 50};
-        }
-        else {
-            timerRect = SDL_Rect{164, HEIGHT-75, 25, 50};
-        }
-        SDL_Surface* timer = TTF_RenderText_Solid(font, std::to_string(currentTime).c_str(), {0, 0, 0});
-        SDL_Texture* timerTexture = SDL_CreateTextureFromSurface(renderer, timer);
-        SDL_RenderCopy(renderer, timerTexture, NULL, &timerRect);
-        SDL_FreeSurface(timer);
-        SDL_DestroyTexture(timerTexture);
-    }
-
-    // Draw high score
-    // ...
-}
-
-
-void drawGameBoardAll(SDL_Renderer* renderer, const std::vector<std::vector<Minesweeper::Cell>>& board) 
-{
-    int size = 50;
-    int start_x = 100;
-    int x = start_x;
-    int y = 100;
-
-    for (auto& row : board) {
-        for (auto& cell : row) {
-            if (cell.bomb) {
-                // Draw gray square with bomb
-                SDL_Texture* square = IMG_LoadTexture(renderer, "textures/graysquarebomb.png");
-                SDL_Rect square_rect{x, y, size, size};
-                SDL_RenderCopy(renderer, square, NULL, &square_rect);
-                SDL_DestroyTexture(square);
-
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                SDL_Rect outline{x, y, size, size};
-                SDL_RenderDrawRect(renderer, &outline);
-            }
-            else {
-                // Draw light gray square with number (ignore if 0)
-                if (cell.num != 0) {
-                    SDL_SetRenderDrawColor(renderer, 192, 192, 192, 255);
-                    SDL_Rect rect{x, y, size, size};
-                    SDL_RenderFillRect(renderer, &rect);
-
-                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                    SDL_Rect outline{x, y, size, size};
-                    SDL_RenderDrawRect(renderer, &outline);
-
-                    // Draw number
-                    SDL_Texture* num = IMG_LoadTexture(renderer, NUMBER_MAP[cell.num]);
-                    SDL_Rect num_rect{x, y, size, size};
-                    SDL_RenderCopy(renderer, num, NULL, &num_rect);
-                    SDL_DestroyTexture(num);
-                }
-                else {
-                    SDL_SetRenderDrawColor(renderer, 192, 192, 192, 255);
-                    SDL_Rect rect{x, y, size, size};
-                    SDL_RenderFillRect(renderer, &rect);
-
-                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                    SDL_Rect outline{x, y, size, size};
-                    SDL_RenderDrawRect(renderer, &outline);
-                }
-            }
-            x += size;
-        }
-        x = start_x;
-        y += size;
-    }
-}
-
-
-void drawGameBoard(SDL_Renderer* renderer, const std::vector<std::vector<Minesweeper::Cell>>& board) 
-{
-    int size = 50;
-    int start_x = 100;
-    int x = start_x;
-    int y = 100;
-
-    for (auto& row : board) {
-        for (auto& cell : row) {
-            if (!cell.revealed && !cell.flag) {
-                // Draw gray square
-                SDL_Texture* square = IMG_LoadTexture(renderer, "textures/graysquare.png");
-                SDL_Rect square_rect{x, y, size, size};
-                SDL_RenderCopy(renderer, square, NULL, &square_rect);
-                SDL_DestroyTexture(square);
-
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                SDL_Rect outline{x, y, size, size};
-                SDL_RenderDrawRect(renderer, &outline);
-            }
-            else if (!cell.revealed && cell.flag) {
-                // Draw gray square with flag
-                SDL_Texture* square = IMG_LoadTexture(renderer, "textures/graysquareflag.png");
-                SDL_Rect square_rect{x, y, size, size};
-                SDL_RenderCopy(renderer, square, NULL, &square_rect);
-                SDL_DestroyTexture(square);
-
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                SDL_Rect outline{x, y, size, size};
-                SDL_RenderDrawRect(renderer, &outline);
-            }
-            else {
-                // Draw light gray square with number (ignore if 0)
-                if (cell.num != 0) {
-                    SDL_SetRenderDrawColor(renderer, 192, 192, 192, 255);
-                    SDL_Rect rect{x, y, size, size};
-                    SDL_RenderFillRect(renderer, &rect);
-
-                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                    SDL_Rect outline{x, y, size, size};
-                    SDL_RenderDrawRect(renderer, &outline);
-
-                    // Draw number
-                    SDL_Texture* num = IMG_LoadTexture(renderer, NUMBER_MAP[cell.num]);
-                    SDL_Rect num_rect{x, y, size, size};
-                    SDL_RenderCopy(renderer, num, NULL, &num_rect);
-                    SDL_DestroyTexture(num);
-                }
-                else {
-                    SDL_SetRenderDrawColor(renderer, 192, 192, 192, 255);
-                    SDL_Rect rect{x, y, size, size};
-                    SDL_RenderFillRect(renderer, &rect);
-
-                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                    SDL_Rect outline{x, y, size, size};
-                    SDL_RenderDrawRect(renderer, &outline);
-                }
-            }
-            x += size;
-        }
-        x = start_x;
-        y += size;
-    }
-}
 
 
 void drawBackground(SDL_Renderer* renderer, int add)
@@ -254,54 +55,20 @@ void drawBackground(SDL_Renderer* renderer, int add)
 }
 
 
-std::pair<unsigned, unsigned> getCellCoords(const int& x, const int& y)
-{
-    int cell_row = 0;
-    int counter = 100;
-    for (int i=0; i<8; ++i) {
-        if (y-counter <= 50) {
-            break;
-        }
-        
-        counter += 50;
-        cell_row++;
-    }
-
-    int cell_col = 0;
-    counter = 100;
-    for (int i=0; i<12; ++i) {
-        if (x-counter <= 50) {
-            break;
-        }
-
-        counter += 50;
-        cell_col++;
-    }
-
-    return std::pair<unsigned, unsigned>{cell_row, cell_col};
-}
-
-
 int main(int argc, char *argv[])
 {
     SDL_Init(SDL_INIT_EVERYTHING);
-    TTF_Init();
-    TTF_Font* Arial = TTF_OpenFont("pixelated.ttf", 64);
-
     SDL_Window* window = SDL_CreateWindow("Minesweeper Lab", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
+    TTF_Init();
+    TTF_Font* Arial = TTF_OpenFont("pixelated.ttf", 64);
+
+    SDL_Texture* menu = IMG_LoadTexture(renderer, "textures/minesweeperlabmenu.png");
+
     SDL_Event windowEvent;
-    bool running = true;
     int add = 0;
-
-    unsigned rows = 8;
-    unsigned cols = 12;
-    unsigned bombs = 12;
-    Minesweeper game{rows, cols, bombs};
-    bool gameInProgress = true;
-    int startTick = 0;
-
+    bool running = true;
     while (running)
     {
         while (SDL_PollEvent(&windowEvent)) {
@@ -311,72 +78,52 @@ int main(int argc, char *argv[])
                 break;
             }
             else if (windowEvent.type == SDL_MOUSEBUTTONDOWN) {
-                if (gameInProgress) {
-                    // Make move (or flag) on cell if mouse is in grid
-                    if (windowEvent.button.button == SDL_BUTTON_LEFT) {
-                        if ( (100 <= windowEvent.motion.x && windowEvent.motion.x <= 700) && (100 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
-                            auto coords = getCellCoords(windowEvent.motion.x, windowEvent.motion.y);
-
-                            if (startTick == 0) {
-                                startTick = SDL_GetTicks64(); // Start recording the time
-                            }
-
-                            if (!game.move(coords.first, coords.second)) {
-                                gameInProgress = false;
-                            }
-                            else if (game.checkWin()) {
-                                gameInProgress = false;
-                            }
+                // User selects a gamemode
+                if ( (450 <= windowEvent.motion.x && windowEvent.motion.x <= 650) && (150 <= windowEvent.motion.y && windowEvent.motion.y <= 300) ) {
+                    // Check NormalGame files for documentation on return values
+                    bool running_normal = true;
+                    while (running_normal) {
+                        Normal game;
+                        std::string choice = game.runNormal(window, renderer, windowEvent, Arial);
+                        if (choice == "CLOSE") {
+                            running = false;
+                            running_normal = false;
                         }
-                    }
-                    else if (windowEvent.button.button == SDL_BUTTON_RIGHT) {
-                        if ( (100 <= windowEvent.motion.x && windowEvent.motion.x <= 700) && (100 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
-                            auto coords = getCellCoords(windowEvent.motion.x, windowEvent.motion.y);
-
-                            if (game.findFlag(coords.first, coords.second)) {
-                                game.removeFlag(coords.first, coords.second);
-                            }
-                            else {
-                                game.flag(coords.first, coords.second);
-                            }
+                        else if (choice == "BACK") {
+                            running_normal = false;
                         }
                     }
                 }
             }
         }
+        if (!running) {
+            break; // User closed window in gamemode
+        }
+
+        // ---------------------------------------
+
         SDL_RenderClear(renderer);
 
-        drawBackground(renderer, add); // Checkerboard
-
-        // ---------------------------------------
-        if (gameInProgress) {
-            SDL_Texture* shadow = IMG_LoadTexture(renderer, "textures/boardshadow.png");
-            SDL_RenderCopy(renderer, shadow, NULL, NULL);
-            SDL_DestroyTexture(shadow);
-            drawGameBoard(renderer, game.getBoard());
-            
-            drawStats(renderer, game, Arial, startTick);
-        }
-        else {
-            SDL_Texture* shadow = IMG_LoadTexture(renderer, "textures/boardshadow.png");
-            SDL_RenderCopy(renderer, shadow, NULL, NULL);
-            SDL_DestroyTexture(shadow);
-            drawGameBoardAll(renderer, game.getBoard());
-        }
-        // ---------------------------------------
+        // Checkerboard and menu
+        drawBackground(renderer, add);
+        SDL_RenderCopy(renderer, menu, NULL, NULL);
 
         SDL_RenderPresent(renderer);
 
+        // Moving background
         if (add == -100) {
             add = -1;
         }
         else {
-            add--; // Moving background
+            add--;
         }
+        SDL_Delay(100);
     }
     
+    // Clean up
     TTF_CloseFont(Arial);
     TTF_Quit();
+    SDL_DestroyTexture(menu);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

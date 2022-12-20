@@ -4,3 +4,6 @@ src/
 
 # Ignore personal main.exe/shell.exe
 *.exe
+
+# Ignore testing files
+testing.cpp
