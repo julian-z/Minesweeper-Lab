@@ -3,14 +3,15 @@
 // SDL (GUI) implementation of Minesweeper Lab.
 
 #include <iostream>
+#include <cmath>
 #include <unordered_map>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 #include "Minesweeper.hpp"
 
-const int WIDTH = 800, HEIGHT = 600;
-
+const int WIDTH = 800;
+const int HEIGHT = 600;
 std::unordered_map<unsigned, const char*> NUMBER_MAP {
     {1, "textures/1.png"},
     {2, "textures/2.png"},
@@ -23,7 +24,7 @@ std::unordered_map<unsigned, const char*> NUMBER_MAP {
 };
 
 
-void drawStats(SDL_Renderer* renderer, const Minesweeper& game, TTF_Font* font) 
+void drawStats(SDL_Renderer* renderer, const Minesweeper& game, TTF_Font* font, int startTick) 
 {
     // Draw logo at top
     SDL_Texture* logo = IMG_LoadTexture(renderer, "textures/minesweeperlablogo.png");
@@ -61,7 +62,41 @@ void drawStats(SDL_Renderer* renderer, const Minesweeper& game, TTF_Font* font)
     SDL_DestroyTexture(countTexture);
 
     // Draw time
-    // ...
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_Rect timeRectBg{100, HEIGHT-75, 200, 50};
+    SDL_RenderFillRect(renderer, &timeRectBg);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_Rect timeRectOutline{100, HEIGHT-75, 200, 50};
+    SDL_RenderDrawRect(renderer, &timeRectOutline);
+    SDL_Texture* timeLogo = IMG_LoadTexture(renderer, "textures/timer.png");
+    SDL_Rect timeLogoRect{100, HEIGHT-75, 50, 50};
+    SDL_RenderCopy(renderer, timeLogo, NULL, &timeLogoRect);
+    SDL_DestroyTexture(timeLogo);
+    if (startTick == 0) {
+        // Draw 0
+        SDL_Surface* timer = TTF_RenderText_Solid(font, "0", {0, 0, 0});
+        SDL_Texture* timerTexture = SDL_CreateTextureFromSurface(renderer, timer);
+        SDL_Rect timerRect{164, HEIGHT-75, 25, 50};
+        SDL_RenderCopy(renderer, timerTexture, NULL, &timerRect);
+        SDL_FreeSurface(timer);
+        SDL_DestroyTexture(timerTexture);
+    }
+    else {
+        // Draw (getTicks()-startTick)/1000
+        int currentTime = (SDL_GetTicks64()-startTick)/1000;
+        SDL_Rect timerRect;
+        if (currentTime > 9) {
+            timerRect = SDL_Rect{164, HEIGHT-75, 50, 50};
+        }
+        else {
+            timerRect = SDL_Rect{164, HEIGHT-75, 25, 50};
+        }
+        SDL_Surface* timer = TTF_RenderText_Solid(font, std::to_string(currentTime).c_str(), {0, 0, 0});
+        SDL_Texture* timerTexture = SDL_CreateTextureFromSurface(renderer, timer);
+        SDL_RenderCopy(renderer, timerTexture, NULL, &timerRect);
+        SDL_FreeSurface(timer);
+        SDL_DestroyTexture(timerTexture);
+    }
 
     // Draw high score
     // ...
@@ -189,11 +224,11 @@ void drawGameBoard(SDL_Renderer* renderer, const std::vector<std::vector<Mineswe
 }
 
 
-void drawBackground(SDL_Renderer* renderer)
+void drawBackground(SDL_Renderer* renderer, int add)
 {
     // int size = 50; // For scaling purposes
     int size = 25;
-    int x = 0;
+    int x = 0+add;
     int y = 0;
     bool dark_green = true;
 
@@ -212,7 +247,7 @@ void drawBackground(SDL_Renderer* renderer)
             SDL_RenderFillRect(renderer, &rect);
             x += size;
         }
-        x = 0;
+        x = 0+add;
         y += size;
         dark_green = !dark_green;
     }
@@ -258,12 +293,14 @@ int main(int argc, char *argv[])
 
     SDL_Event windowEvent;
     bool running = true;
+    int add = 0;
 
     unsigned rows = 8;
     unsigned cols = 12;
     unsigned bombs = 12;
     Minesweeper game{rows, cols, bombs};
     bool gameInProgress = true;
+    int startTick = 0;
 
     while (running)
     {
@@ -279,6 +316,10 @@ int main(int argc, char *argv[])
                     if (windowEvent.button.button == SDL_BUTTON_LEFT) {
                         if ( (100 <= windowEvent.motion.x && windowEvent.motion.x <= 700) && (100 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
                             auto coords = getCellCoords(windowEvent.motion.x, windowEvent.motion.y);
+
+                            if (startTick == 0) {
+                                startTick = SDL_GetTicks64(); // Start recording the time
+                            }
 
                             if (!game.move(coords.first, coords.second)) {
                                 gameInProgress = false;
@@ -305,7 +346,7 @@ int main(int argc, char *argv[])
         }
         SDL_RenderClear(renderer);
 
-        drawBackground(renderer); // Checkerboard
+        drawBackground(renderer, add); // Checkerboard
 
         // ---------------------------------------
         if (gameInProgress) {
@@ -314,7 +355,7 @@ int main(int argc, char *argv[])
             SDL_DestroyTexture(shadow);
             drawGameBoard(renderer, game.getBoard());
             
-            drawStats(renderer, game, Arial);
+            drawStats(renderer, game, Arial, startTick);
         }
         else {
             SDL_Texture* shadow = IMG_LoadTexture(renderer, "textures/boardshadow.png");
@@ -325,6 +366,13 @@ int main(int argc, char *argv[])
         // ---------------------------------------
 
         SDL_RenderPresent(renderer);
+
+        if (add == -100) {
+            add = -1;
+        }
+        else {
+            add--; // Moving background
+        }
     }
     
     TTF_CloseFont(Arial);
