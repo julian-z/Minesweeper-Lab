@@ -6,7 +6,7 @@ Minesweeper Lab is a recreation of the 1989 puzzle game, Minesweeper. In this ve
 
 # Installation Requirements
 SDL2 and SQLite are required for the application to run.
-- SDL2
-- SDL2_ttf
-- SDL2_image
-- SQLite
+- SDL2: https://github.com/libsdl-org/SDL/releases/tag/release-2.26.1
+- SDL2_ttf: https://github.com/libsdl-org/SDL_ttf
+- SDL2_image: https://github.com/libsdl-org/SDL_image
+- SQLite: https://www.sqlite.org/download.html
