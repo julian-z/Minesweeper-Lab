@@ -33,6 +33,7 @@ std::string Normal::runNormal()
     int startTick = 0;
     bool win = false;
     int finishingTime = 0;
+    int hover = 0;
 
     while (true)
     {
@@ -98,6 +99,19 @@ std::string Normal::runNormal()
                     return "BACK"; // Return to menu
                 }
             }
+            else if (!gameInProgress && windowEvent.type == SDL_MOUSEMOTION) {
+                if ( (200 <= windowEvent.motion.x && windowEvent.motion.x <= 600) && (250 <= windowEvent.motion.y && windowEvent.motion.y <= 400) ) {
+                    // Hovering over new
+                    hover = 1;
+                }
+                else if ( (0 <= windowEvent.motion.x && windowEvent.motion.x <= 100) && (0 <= windowEvent.motion.y && windowEvent.motion.y <= 100) ) {
+                    // Hovering over back
+                    hover = 2;
+                }
+                else {
+                    hover = 0;
+                }
+            }
         }
         SDL_RenderClear(renderer);
 
@@ -114,7 +128,20 @@ std::string Normal::runNormal()
                 SDL_RenderCopy(renderer, shadow, NULL, NULL);
                 drawGameBoardAll(game.getBoard());
 
-                SDL_Texture* overlay = IMG_LoadTexture(renderer, "textures/minesweeperwon.png");
+                SDL_Texture* overlay;
+                switch (hover)
+                {
+                case 0:
+                    overlay = IMG_LoadTexture(renderer, "textures/minesweeperwon.png");
+                    break;
+                case 1:
+                    overlay = IMG_LoadTexture(renderer, "textures/minesweeperwonnew.png");
+                    break;
+                case 2:
+                    overlay = IMG_LoadTexture(renderer, "textures/minesweeperwonback.png");
+                    break;
+                }
+                
                 SDL_RenderCopy(renderer, overlay, NULL, NULL);
                 SDL_DestroyTexture(overlay);
 
@@ -124,7 +151,20 @@ std::string Normal::runNormal()
                 SDL_RenderCopy(renderer, shadow, NULL, NULL);
                 drawGameBoardAll(game.getBoard());
 
-                SDL_Texture* overlay = IMG_LoadTexture(renderer, "textures/minesweeperlost.png");
+                SDL_Texture* overlay;
+                switch (hover)
+                {
+                case 0:
+                    overlay = IMG_LoadTexture(renderer, "textures/minesweeperlost.png");
+                    break;
+                case 1:
+                    overlay = IMG_LoadTexture(renderer, "textures/minesweeperlostnew.png");
+                    break;
+                case 2:
+                    overlay = IMG_LoadTexture(renderer, "textures/minesweeperlostback.png");
+                    break;
+                }
+
                 SDL_RenderCopy(renderer, overlay, NULL, NULL);
                 SDL_DestroyTexture(overlay);
 

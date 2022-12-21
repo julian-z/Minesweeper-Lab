@@ -1,4 +1,4 @@
-// NormalGame.cpp -- Julian Zulfikar, 2022
+// NormalGame.hpp -- Julian Zulfikar, 2022
 // ------------------------------------------------------
 // Normal gamemode declarations.
 
@@ -6,7 +6,6 @@
 #define NORMAL_HPP
 
 #include <iostream>
-#include <cmath>
 #include <unordered_map>
 
 #include <SDL2/SDL.h>

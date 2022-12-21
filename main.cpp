@@ -63,9 +63,12 @@ void drawBackground(SDL_Renderer* renderer, int add)
 // Runs game starting from menu, calls gamemodes when necessary
 int main(int argc, char *argv[])
 {
+    // ---------------------------------------
+    // Initialization
+    // ---------------------------------------
     sqlite3* scoresDB;
-    sqlite3_open("scoresdev.db", &scoresDB); // DEVELOPER MODE
-    // sqlite3_open("scores.db", &scoresDB); // LOCAL PLAYER
+    // sqlite3_open("scoresdev.db", &scoresDB); // DEVELOPER MODE
+    sqlite3_open("scores.db", &scoresDB); // LOCAL PLAYER
 
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window* window = SDL_CreateWindow("Minesweeper Lab", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
@@ -81,6 +84,9 @@ int main(int argc, char *argv[])
     SDL_Texture* timedHover = IMG_LoadTexture(renderer, "textures/menuselecttimed.png");
     int hover = 0;
 
+    // ---------------------------------------
+    // Window Loop
+    // ---------------------------------------
     SDL_Event windowEvent;
     int add = 0;
     bool running = true;
@@ -153,7 +159,6 @@ int main(int argc, char *argv[])
         // ---------------------------------------
         // Render menu
         // ---------------------------------------
-
         SDL_RenderClear(renderer);
 
         // Checkerboard and menu
@@ -190,7 +195,9 @@ int main(int argc, char *argv[])
         SDL_Delay(50);
     }
     
+    // ---------------------------------------
     // Clean up
+    // ---------------------------------------
     TTF_CloseFont(Pixelated);
     TTF_Quit();
 
