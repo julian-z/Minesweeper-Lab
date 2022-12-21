@@ -2,6 +2,10 @@
 *.dll
 src/
 
+# Ignore VSCode specific files
+.vscode
+.vs
+
 # Ignore personal main.exe/shell.exe
 *.exe
 

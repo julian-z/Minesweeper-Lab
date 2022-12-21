@@ -64,7 +64,8 @@ void drawBackground(SDL_Renderer* renderer, int add)
 int main(int argc, char *argv[])
 {
     sqlite3* scoresDB;
-    sqlite3_open("scores.db", &scoresDB); // DEBUG
+    sqlite3_open("scoresdev.db", &scoresDB); // DEVELOPER MODE
+    // sqlite3_open("scores.db", &scoresDB); // LOCAL PLAYER
 
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window* window = SDL_CreateWindow("Minesweeper Lab", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
