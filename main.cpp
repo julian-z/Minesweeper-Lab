@@ -3,13 +3,15 @@
 // SDL (GUI) implementation of Minesweeper Lab.
 
 #include <iostream>
-#include <cmath>
 #include <unordered_map>
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
+
 #include "Minesweeper.hpp"
-#include "NormalGame.cpp"
+#include "NormalGame.hpp"
+
 
 const int WIDTH = 800;
 const int HEIGHT = 600;
@@ -62,10 +64,9 @@ int main(int argc, char *argv[])
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
     TTF_Init();
-    TTF_Font* Arial = TTF_OpenFont("pixelated.ttf", 64);
+    TTF_Font* Pixelated = TTF_OpenFont("pixelated.ttf", 64);
 
     SDL_Texture* menu = IMG_LoadTexture(renderer, "textures/minesweeperlabmenu.png");
-
     SDL_Event windowEvent;
     int add = 0;
     bool running = true;
@@ -78,13 +79,14 @@ int main(int argc, char *argv[])
                 break;
             }
             else if (windowEvent.type == SDL_MOUSEBUTTONDOWN) {
+
                 // User selects a gamemode
                 if ( (450 <= windowEvent.motion.x && windowEvent.motion.x <= 650) && (150 <= windowEvent.motion.y && windowEvent.motion.y <= 300) ) {
                     // Check NormalGame files for documentation on return values
                     bool running_normal = true;
                     while (running_normal) {
-                        Normal game;
-                        std::string choice = game.runNormal(window, renderer, windowEvent, Arial);
+                        Normal game(window, renderer, windowEvent, Pixelated);
+                        std::string choice = game.runNormal();
                         if (choice == "CLOSE") {
                             running = false;
                             running_normal = false;
@@ -94,12 +96,15 @@ int main(int argc, char *argv[])
                         }
                     }
                 }
+
             }
         }
         if (!running) {
             break; // User closed window in gamemode
         }
 
+        // ---------------------------------------
+        // Render menu
         // ---------------------------------------
 
         SDL_RenderClear(renderer);
@@ -117,11 +122,11 @@ int main(int argc, char *argv[])
         else {
             add--;
         }
-        SDL_Delay(100);
+        SDL_Delay(50);
     }
     
     // Clean up
-    TTF_CloseFont(Arial);
+    TTF_CloseFont(Pixelated);
     TTF_Quit();
     SDL_DestroyTexture(menu);
     SDL_DestroyRenderer(renderer);
