@@ -1,9 +1,13 @@
 # Ignore SDL files
-*.dll
-src/
+# *.dll
+# src/
 
 # Ignore personal main.exe/shell.exe
 *.exe
 
 # Ignore testing files
 testing.cpp
+
+# Ignore development databases
+sql.sql
+scoresdev.db

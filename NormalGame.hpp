@@ -8,9 +8,13 @@
 #include <iostream>
 #include <cmath>
 #include <unordered_map>
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
+#include <SQLite/sqlite3.h>
+#include "SQLHelpers.hpp"
+
 #include "Minesweeper.hpp"
 
 
@@ -27,6 +31,7 @@ private:
     SDL_Renderer* renderer = nullptr;
     SDL_Event windowEvent;
     TTF_Font* font = nullptr;
+    sqlite3* scoresDB = nullptr;
 
     const unsigned rows = 8;
     const unsigned cols = 12;
@@ -58,9 +63,9 @@ private:
 
 public:
     // Parameters are passed in from main.cpp, so we are able to render onto the window
-    Normal(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont);
+    Normal(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont, sqlite3* initDB);
 
-    // Clean up (font, window, renderer are not our responsibility)
+    // Clean up (font, window, renderer, and database are not our responsibility)
     ~Normal();
 
     // Returns "CLOSE" if user closed game, "NEW" if user chose new game, "BACK" if user returns to menu

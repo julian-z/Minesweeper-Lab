@@ -8,6 +8,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
+#include <SQLite/sqlite3.h>
+#include "SQLHelpers.hpp"
 
 #include "Minesweeper.hpp"
 #include "NormalGame.hpp"
@@ -61,6 +63,9 @@ void drawBackground(SDL_Renderer* renderer, int add)
 // Runs game starting from menu, calls gamemodes when necessary
 int main(int argc, char *argv[])
 {
+    sqlite3* scoresDB;
+    sqlite3_open("scores.db", &scoresDB); // DEBUG
+
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window* window = SDL_CreateWindow("Minesweeper Lab", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -90,10 +95,10 @@ int main(int argc, char *argv[])
 
                 // User selects a gamemode
                 if ( (450 <= windowEvent.motion.x && windowEvent.motion.x <= 650) && (150 <= windowEvent.motion.y && windowEvent.motion.y <= 300) ) {
-                    // Check NormalGame files for documentation on return values
+                    // Normal
                     bool running_normal = true;
                     while (running_normal) {
-                        Normal game(window, renderer, windowEvent, Pixelated);
+                        Normal game(window, renderer, windowEvent, Pixelated, scoresDB);
                         std::string choice = game.runNormal();
                         if (choice == "CLOSE") {
                             running = false;
@@ -103,6 +108,15 @@ int main(int argc, char *argv[])
                             running_normal = false;
                         }
                     }
+                }
+                else if ( (150 <= windowEvent.motion.x && windowEvent.motion.x <= 350) && (150 <= windowEvent.motion.y && windowEvent.motion.y <= 300) ) {
+                    // Tutorial
+                }
+                else if ( (150 <= windowEvent.motion.x && windowEvent.motion.x <= 350) && (350 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
+                    // 3x3
+                }
+                else if ( (450 <= windowEvent.motion.x && windowEvent.motion.x <= 650) && (350 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
+                    // Timed
                 }
 
             }
@@ -188,6 +202,8 @@ int main(int argc, char *argv[])
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+
+    sqlite3_close(scoresDB);
     
     return 0;
 }

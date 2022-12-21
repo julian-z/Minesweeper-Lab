@@ -5,8 +5,8 @@
 #include "NormalGame.hpp"
 
 
-Normal::Normal(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont)
-: window{initWindow}, renderer{initRenderer}, windowEvent{initEvent}, font{initFont}
+Normal::Normal(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont, sqlite3* initDB)
+: window{initWindow}, renderer{initRenderer}, windowEvent{initEvent}, font{initFont}, scoresDB{initDB}
 {
     shadow = IMG_LoadTexture(renderer, "textures/boardshadow.png");
     square = IMG_LoadTexture(renderer, "textures/graysquare.png");
@@ -64,6 +64,17 @@ std::string Normal::runNormal()
                                 }
                                 gameInProgress = false;
                                 win = true;
+
+                                // Select high score from database
+                                Result result;
+                                std::string sqlCommand = "SELECT normal from players where name = \"local\"";
+                                sqlite3_exec(scoresDB, sqlCommand.c_str(), callback, &result, NULL);
+
+                                if (result.resultingCall == 0 || finishingTime < result.resultingCall) {
+                                    // Update high score
+                                    sqlCommand = "UPDATE players set normal = "+std::to_string(finishingTime)+" where name=\"local\"";
+                                    sqlite3_exec(scoresDB, sqlCommand.c_str(), callback, &result, NULL);
+                                }
                             }
                         }
                     }
@@ -214,7 +225,46 @@ void Normal::drawStats(int startTick)
     }
 
     // Draw high score
-    // ...
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_Rect hsRectBg{500, HEIGHT-75, 200, 50};
+    SDL_RenderFillRect(renderer, &hsRectBg);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_Rect hsRectOutline{500, HEIGHT-75, 200, 50};
+    SDL_RenderDrawRect(renderer, &hsRectOutline);
+    SDL_Texture* trophy = IMG_LoadTexture(renderer, "textures/trophy.png");
+    SDL_Rect trophyRect{500, HEIGHT-75, 50, 50};
+    SDL_RenderCopy(renderer, trophy, NULL, &trophyRect);
+    SDL_DestroyTexture(trophy);
+    // Select normal high score
+    Result result;
+    std::string sqlCommand = "SELECT normal from players where name = \"local\"";
+    sqlite3_exec(scoresDB, sqlCommand.c_str(), callback, &result, NULL);
+    SDL_Rect hsRect;
+    SDL_Surface* hsSurface;
+    if (result.resultingCall == 0) {
+        hsRect = SDL_Rect{564, HEIGHT-75, 75, 50};
+        hsSurface = TTF_RenderText_Solid(font, "N/A", {0, 0, 0});
+    }
+    else if (result.resultingCall > 9) {
+        hsRect = SDL_Rect{564, HEIGHT-75, 50, 50};
+        hsSurface = TTF_RenderText_Solid(font, std::to_string(result.resultingCall).c_str(), {0, 0, 0});
+    }
+    else if (result.resultingCall > 99) {
+        hsRect = SDL_Rect{564, HEIGHT-75, 75, 50};
+        hsSurface = TTF_RenderText_Solid(font, std::to_string(result.resultingCall).c_str(), {0, 0, 0});
+    }
+    else if (result.resultingCall > 999) {
+        hsRect = SDL_Rect{564, HEIGHT-75, 100, 50};
+        hsSurface = TTF_RenderText_Solid(font, std::to_string(result.resultingCall).c_str(), {0, 0, 0});
+    }
+    else {
+        hsRect = SDL_Rect{564, HEIGHT-75, 25, 50};
+        hsSurface = TTF_RenderText_Solid(font, std::to_string(result.resultingCall).c_str(), {0, 0, 0});
+    }
+    SDL_Texture* hsTexture = SDL_CreateTextureFromSurface(renderer, hsSurface);
+    SDL_RenderCopy(renderer, hsTexture, NULL, &hsRect);
+    SDL_FreeSurface(hsSurface);
+    SDL_DestroyTexture(hsTexture);
 }
 
 
@@ -253,7 +303,46 @@ void Normal::drawStatsGameOver(int time)
     SDL_DestroyTexture(timerTexture);
 
     // Draw high score
-    // ...
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_Rect hsRectBg{500, HEIGHT-75, 200, 50};
+    SDL_RenderFillRect(renderer, &hsRectBg);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_Rect hsRectOutline{500, HEIGHT-75, 200, 50};
+    SDL_RenderDrawRect(renderer, &hsRectOutline);
+    SDL_Texture* trophy = IMG_LoadTexture(renderer, "textures/trophy.png");
+    SDL_Rect trophyRect{500, HEIGHT-75, 50, 50};
+    SDL_RenderCopy(renderer, trophy, NULL, &trophyRect);
+    SDL_DestroyTexture(trophy);
+    // Select normal high score
+    Result result;
+    std::string sqlCommand = "SELECT normal from players where name = \"local\"";
+    sqlite3_exec(scoresDB, sqlCommand.c_str(), callback, &result, NULL);
+    SDL_Rect hsRect;
+    SDL_Surface* hsSurface;
+    if (result.resultingCall == 0) {
+        hsRect = SDL_Rect{564, HEIGHT-75, 75, 50};
+        hsSurface = TTF_RenderText_Solid(font, "N/A", {0, 0, 0});
+    }
+    else if (result.resultingCall > 9) {
+        hsRect = SDL_Rect{564, HEIGHT-75, 50, 50};
+        hsSurface = TTF_RenderText_Solid(font, std::to_string(result.resultingCall).c_str(), {0, 0, 0});
+    }
+    else if (result.resultingCall > 99) {
+        hsRect = SDL_Rect{564, HEIGHT-75, 75, 50};
+        hsSurface = TTF_RenderText_Solid(font, std::to_string(result.resultingCall).c_str(), {0, 0, 0});
+    }
+    else if (result.resultingCall > 999) {
+        hsRect = SDL_Rect{564, HEIGHT-75, 100, 50};
+        hsSurface = TTF_RenderText_Solid(font, std::to_string(result.resultingCall).c_str(), {0, 0, 0});
+    }
+    else {
+        hsRect = SDL_Rect{564, HEIGHT-75, 25, 50};
+        hsSurface = TTF_RenderText_Solid(font, std::to_string(result.resultingCall).c_str(), {0, 0, 0});
+    }
+    SDL_Texture* hsTexture = SDL_CreateTextureFromSurface(renderer, hsSurface);
+    SDL_RenderCopy(renderer, hsTexture, NULL, &hsRect);
+    SDL_FreeSurface(hsSurface);
+    SDL_DestroyTexture(hsTexture);
 }
 
 
