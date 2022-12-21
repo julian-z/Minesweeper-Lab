@@ -22,6 +22,7 @@ private:
     SDL_Texture* square = nullptr;
     SDL_Texture* flag = nullptr;
     SDL_Texture* bomb = nullptr;
+
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
     SDL_Event windowEvent;
@@ -44,7 +45,6 @@ private:
         {7, "textures/7.png"},
         {8, "textures/8.png"}
     };
-
 
     void drawStats(int startTick);
     void drawStatsGameOver(int time);

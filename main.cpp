@@ -27,6 +27,7 @@ std::unordered_map<unsigned, const char*> NUMBER_MAP {
 };
 
 
+// Draws green checkerboard with add offset
 void drawBackground(SDL_Renderer* renderer, int add)
 {
     // int size = 50; // For scaling purposes
@@ -57,6 +58,7 @@ void drawBackground(SDL_Renderer* renderer, int add)
 }
 
 
+// Runs game starting from menu, calls gamemodes when necessary
 int main(int argc, char *argv[])
 {
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -67,6 +69,12 @@ int main(int argc, char *argv[])
     TTF_Font* Pixelated = TTF_OpenFont("pixelated.ttf", 64);
 
     SDL_Texture* menu = IMG_LoadTexture(renderer, "textures/minesweeperlabmenu.png");
+    SDL_Texture* normalHover = IMG_LoadTexture(renderer, "textures/menuselectnormal.png");
+    SDL_Texture* tutorialHover = IMG_LoadTexture(renderer, "textures/menuselecttutorial.png");
+    SDL_Texture* threeHover = IMG_LoadTexture(renderer, "textures/menuselect3x3.png");
+    SDL_Texture* timedHover = IMG_LoadTexture(renderer, "textures/menuselecttimed.png");
+    int hover = 0;
+
     SDL_Event windowEvent;
     int add = 0;
     bool running = true;
@@ -78,7 +86,7 @@ int main(int argc, char *argv[])
                 running = false;
                 break;
             }
-            else if (windowEvent.type == SDL_MOUSEBUTTONDOWN) {
+            if (windowEvent.type == SDL_MOUSEBUTTONDOWN) {
 
                 // User selects a gamemode
                 if ( (450 <= windowEvent.motion.x && windowEvent.motion.x <= 650) && (150 <= windowEvent.motion.y && windowEvent.motion.y <= 300) ) {
@@ -98,6 +106,30 @@ int main(int argc, char *argv[])
                 }
 
             }
+            if (windowEvent.type == SDL_MOUSEMOTION) {
+
+                // User hovers over a gamemode
+                if ( (450 <= windowEvent.motion.x && windowEvent.motion.x <= 650) && (150 <= windowEvent.motion.y && windowEvent.motion.y <= 300) ) {
+                    // Hovering over Normal
+                    hover = 1;
+                }
+                else if ( (150 <= windowEvent.motion.x && windowEvent.motion.x <= 350) && (150 <= windowEvent.motion.y && windowEvent.motion.y <= 300) ) {
+                    // Hovering over Tutorial
+                    hover = 2;
+                }
+                else if ( (150 <= windowEvent.motion.x && windowEvent.motion.x <= 350) && (350 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
+                    // Hovering over 3x3
+                    hover = 3;
+                }
+                else if ( (450 <= windowEvent.motion.x && windowEvent.motion.x <= 650) && (350 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
+                    // Hovering over Timed
+                    hover = 4;
+                }
+                else {
+                    hover = 0;
+                }
+
+            }
         }
         if (!running) {
             break; // User closed window in gamemode
@@ -112,6 +144,24 @@ int main(int argc, char *argv[])
         // Checkerboard and menu
         drawBackground(renderer, add);
         SDL_RenderCopy(renderer, menu, NULL, NULL);
+
+        switch (hover)
+        {
+        case 1:
+            SDL_RenderCopy(renderer, normalHover, NULL, NULL);
+            break;
+        case 2:
+            SDL_RenderCopy(renderer, tutorialHover, NULL, NULL);
+            break;
+        case 3:
+            SDL_RenderCopy(renderer, threeHover, NULL, NULL);
+            break;
+        case 4:
+            SDL_RenderCopy(renderer, timedHover, NULL, NULL);
+            break;   
+        default:
+            break;
+        }
 
         SDL_RenderPresent(renderer);
 
@@ -128,6 +178,12 @@ int main(int argc, char *argv[])
     // Clean up
     TTF_CloseFont(Pixelated);
     TTF_Quit();
+
+    SDL_DestroyTexture(normalHover);
+    SDL_DestroyTexture(tutorialHover);
+    SDL_DestroyTexture(threeHover);
+    SDL_DestroyTexture(timedHover);
+
     SDL_DestroyTexture(menu);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
