@@ -60,6 +60,9 @@ public:
     // Returns true if successful, false if bomb
     bool move(unsigned x, unsigned y);
 
+    // Reset the game
+    void reset(unsigned initBombs);
+
 private:
     unsigned numRows;
     unsigned numCols;

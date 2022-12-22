@@ -1,9 +1,9 @@
-// TimedGame.hpp -- Julian Zulfikar, 2022
+// FourGame.hpp -- Julian Zulfikar, 2022
 // ------------------------------------------------------
-// Timed gamemode declarations.
+// 4x4 gamemode declarations.
 
-#ifndef TIMED_HPP
-#define TIMED_HPP
+#ifndef FOUR_HPP
+#define FOUR_HPP
 
 #include <iostream>
 #include <unordered_map>
@@ -17,10 +17,10 @@
 #include "Minesweeper.hpp"
 
 
-class Timed 
+class Four 
 {
 private:
-    SDL_Texture* timedSelection;
+    SDL_Texture* checkmark = nullptr;
 
     SDL_Texture* logo = nullptr;
     SDL_Texture* shadow = nullptr;
@@ -34,9 +34,9 @@ private:
     TTF_Font* font = nullptr;
     sqlite3* scoresDB = nullptr;
 
-    const unsigned rows = 8;
-    const unsigned cols = 12;
-    const unsigned bombs = 12;
+    const unsigned rows = 4;
+    const unsigned cols = 4;
+    const unsigned bombs = 2;
     Minesweeper game{rows, cols, bombs};
 
     const int WIDTH = 800;
@@ -52,8 +52,8 @@ private:
         {8, "textures/8.png"}
     };
 
-    void drawStats(int startTick);
-    void drawStatsGameOver(int time);
+    void drawStats(int startTick, int solvedCount);
+    void drawStatsGameOver(int time, int solvedCount);
 
     void drawGameBoardAll(const std::vector<std::vector<Minesweeper::Cell>>& board);
     void drawGameBoard(const std::vector<std::vector<Minesweeper::Cell>>& board);
@@ -64,13 +64,13 @@ private:
 
 public:
     // Parameters are passed in from main.cpp, so we are able to render onto the window
-    Timed(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont, sqlite3* initDB);
+    Four(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont, sqlite3* initDB);
 
     // Clean up (font, window, renderer, and database are not our responsibility)
-    ~Timed();
+    ~Four();
 
     // Returns "CLOSE" if user closed game, "NEW" if user chose new game, "BACK" if user returns to menu
-    std::string runTimed();
+    std::string runFour();
 };
 
 

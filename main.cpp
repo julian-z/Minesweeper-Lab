@@ -14,6 +14,7 @@
 #include "Minesweeper.hpp"
 #include "NormalGame.hpp"
 #include "TimedGame.hpp"
+#include "FourGame.hpp"
 
 
 const int WIDTH = 800;
@@ -81,7 +82,7 @@ int main(int argc, char *argv[])
     SDL_Texture* menu = IMG_LoadTexture(renderer, "textures/minesweeperlabmenu.png");
     SDL_Texture* normalHover = IMG_LoadTexture(renderer, "textures/menuselectnormal.png");
     SDL_Texture* tutorialHover = IMG_LoadTexture(renderer, "textures/menuselecttutorial.png");
-    SDL_Texture* threeHover = IMG_LoadTexture(renderer, "textures/menuselect3x3.png");
+    SDL_Texture* fourHover = IMG_LoadTexture(renderer, "textures/menuselect4x4.png");
     SDL_Texture* timedHover = IMG_LoadTexture(renderer, "textures/menuselecttimed.png");
     int hover = 0;
 
@@ -119,9 +120,22 @@ int main(int argc, char *argv[])
                 }
                 else if ( (150 <= windowEvent.motion.x && windowEvent.motion.x <= 350) && (150 <= windowEvent.motion.y && windowEvent.motion.y <= 300) ) {
                     // Tutorial
+                    // ...
                 }
                 else if ( (150 <= windowEvent.motion.x && windowEvent.motion.x <= 350) && (350 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
-                    // 3x3
+                    // 4x4
+                    bool running_four = true;
+                    while (running_four) {
+                        Four game(window, renderer, windowEvent, Pixelated, scoresDB);
+                        std::string choice = game.runFour();
+                        if (choice == "CLOSE") {
+                            running = false;
+                            running_four = false;
+                        }
+                        else if (choice == "BACK") {
+                            running_four = false;
+                        }
+                    }
                 }
                 else if ( (450 <= windowEvent.motion.x && windowEvent.motion.x <= 650) && (350 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
                     // Timed
@@ -152,7 +166,7 @@ int main(int argc, char *argv[])
                     hover = 2;
                 }
                 else if ( (150 <= windowEvent.motion.x && windowEvent.motion.x <= 350) && (350 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
-                    // Hovering over 3x3
+                    // Hovering over 4x4
                     hover = 3;
                 }
                 else if ( (450 <= windowEvent.motion.x && windowEvent.motion.x <= 650) && (350 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
@@ -187,7 +201,7 @@ int main(int argc, char *argv[])
             SDL_RenderCopy(renderer, tutorialHover, NULL, NULL);
             break;
         case 3:
-            SDL_RenderCopy(renderer, threeHover, NULL, NULL);
+            SDL_RenderCopy(renderer, fourHover, NULL, NULL);
             break;
         case 4:
             SDL_RenderCopy(renderer, timedHover, NULL, NULL);
@@ -216,7 +230,7 @@ int main(int argc, char *argv[])
 
     SDL_DestroyTexture(normalHover);
     SDL_DestroyTexture(tutorialHover);
-    SDL_DestroyTexture(threeHover);
+    SDL_DestroyTexture(fourHover);
     SDL_DestroyTexture(timedHover);
 
     SDL_DestroyTexture(menu);

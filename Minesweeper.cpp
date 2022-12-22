@@ -289,3 +289,44 @@ bool Minesweeper::move(unsigned x, unsigned y)
     return true;
 }
 
+
+void Minesweeper::reset(unsigned initBombs)
+{
+    // Reinitialize bombs
+    numBombs = initBombs;
+    numFlags = initBombs;
+    numNotRevealed = (numRows*numCols)-initBombs;
+
+    // Initialize empty gameBoard
+    gameBoard.clear();
+    for (int i=0; i<numRows; ++i) {
+        std::vector<Cell> row;
+        for (int k=0; k<numCols; ++k) {
+            row.push_back( Cell{0, false, false, false} );
+        }
+        gameBoard.push_back(row);
+    }
+
+    // Randomly select numBombs locations
+    for (int i=0; i<numBombs; ++i) {
+        unsigned row;
+        unsigned col;
+
+        srand((int)time(0));
+        while (true) {
+            unsigned x = rand() % numRows;
+            unsigned y = rand() % numCols;
+            if (!gameBoard[x][y].bomb) {
+                gameBoard[x][y].bomb = true;
+                row = x;
+                col = y;
+                break;
+            }
+        }
+
+        // num++ all Cells in radius of [row][col]
+        for (const std::pair<unsigned, unsigned>& coord : getRadiusCoords(row, col, numRows, numCols)) {
+            gameBoard[coord.first][coord.second].num++;
+        }
+    }
+}

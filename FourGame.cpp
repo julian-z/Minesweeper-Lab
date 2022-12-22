@@ -1,15 +1,15 @@
-// TimedGame.cpp -- Julian Zulfikar, 2022
+// FourGame.cpp -- Julian Zulfikar, 2022
 // ------------------------------------------------------
-// Timed gamemode definitions.
+// 4x4 gamemode definitions.
 
-#include "TimedGame.hpp"
+#include "FourGame.hpp"
 
 
-Timed::Timed(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont, sqlite3* initDB)
+Four::Four(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont, sqlite3* initDB)
 : window{initWindow}, renderer{initRenderer}, windowEvent{initEvent}, font{initFont}, scoresDB{initDB}
 {
-    timedSelection = IMG_LoadTexture(renderer, "textures/minesweeperlabtimedselection.png");
-    shadow = IMG_LoadTexture(renderer, "textures/boardshadow.png");
+    checkmark = IMG_LoadTexture(renderer, "textures/graysquarecheckmark.png");
+    shadow = IMG_LoadTexture(renderer, "textures/boardshadowfour.png");
     square = IMG_LoadTexture(renderer, "textures/graysquare.png");
     flag = IMG_LoadTexture(renderer, "textures/graysquareflag.png");
     bomb = IMG_LoadTexture(renderer, "textures/graysquarebomb.png");
@@ -17,9 +17,9 @@ Timed::Timed(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initE
 }
 
 
-Timed::~Timed()
+Four::~Four()
 {
-    SDL_DestroyTexture(timedSelection);
+    SDL_DestroyTexture(checkmark);
     SDL_DestroyTexture(shadow);
     SDL_DestroyTexture(square);
     SDL_DestroyTexture(flag);
@@ -28,82 +28,14 @@ Timed::~Timed()
 }
 
 
-std::string Timed::runTimed()
+std::string Four::runFour()
 {
     int add = 0;
-
-    // Get last selected time (10 if first time)
-    Result result;
-    std::string sqlCommand = "SELECT lastFourSelection from players where name = \"local\"";
-    sqlite3_exec(scoresDB, sqlCommand.c_str(), callback, &result, NULL);
-    int selectedTime = result.resultingCall; // Min = 1, max = 999
-
-    // Select time
-    bool selecting = true;
-    while (selecting) {
-        while (SDL_PollEvent(&windowEvent)) {
-            if (windowEvent.type == SDL_QUIT)
-            {
-                return "CLOSE"; // Signal to close window in main.cpp
-            }
-            if (windowEvent.type == SDL_MOUSEBUTTONDOWN) {
-                if ( (200 <= windowEvent.motion.x && windowEvent.motion.x <= 250) && (300 <= windowEvent.motion.y && windowEvent.motion.y <= 350) ) {
-                    selectedTime = (1 <= selectedTime-1 && selectedTime-1 <= 999) ? selectedTime-1 : 999;
-                }
-                else if ( (250 <= windowEvent.motion.x && windowEvent.motion.x <= 300) && (300 <= windowEvent.motion.y && windowEvent.motion.y <= 350) ) {
-                    selectedTime = (1 <= selectedTime+1 && selectedTime+1 <= 999) ? selectedTime+1 : 1;
-                }
-                else if ( (500 <= windowEvent.motion.x && windowEvent.motion.x <= 600) && (300 <= windowEvent.motion.y && windowEvent.motion.y <= 350) ) {
-                    selecting = false;
-                }
-            }
-        }
-
-        // ------------------------
-
-        SDL_RenderClear(renderer);
-
-        drawBackground(add); // Checkerboard
-
-        SDL_RenderCopy(renderer, timedSelection, NULL, NULL);
-        SDL_Surface* selectionSurface = TTF_RenderText_Solid(font, std::to_string(selectedTime).c_str(), {0, 0, 0});
-        SDL_Texture* selectionTexture = SDL_CreateTextureFromSurface(renderer, selectionSurface);
-        SDL_Rect selectionRect;
-        if (selectedTime > 9) {
-            selectionRect = SDL_Rect{450, 300, 50, 50};
-        }
-        else if (selectedTime > 99) {
-            selectionRect = SDL_Rect{425, 300, 100, 50};
-        }
-        else {
-            selectionRect = SDL_Rect{475, 300, 25, 50};
-        }
-        SDL_RenderCopy(renderer, selectionTexture, NULL, &selectionRect);
-        SDL_FreeSurface(selectionSurface);
-        SDL_DestroyTexture(selectionTexture);
-
-        SDL_RenderPresent(renderer);
-
-        // ------------------------
-
-        if (add == -100) {
-            add = -1;
-        }
-        else {
-            add--; // Moving background
-        }
-        SDL_Delay(50);
-    }
-
-    // Store selected time as new last selected time
-    sqlCommand = "UPDATE players set lastFourSelection = "+std::to_string(selectedTime)+" where name=\"local\"";
-    sqlite3_exec(scoresDB, sqlCommand.c_str(), callback, &result, NULL);
-
-    // Run Timed gamemode
     bool gameInProgress = true;
-    int lastMoveTick = 0;
-    bool win = false;
+    int startTick = 0;
+    int solvedCount = 0;
     int hover = 0;
+    bool win = false;
 
     while (true)
     {
@@ -119,30 +51,16 @@ std::string Timed::runTimed()
                         if ( (100 <= windowEvent.motion.x && windowEvent.motion.x <= 700) && (100 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
                             auto coords = getCellCoords(windowEvent.motion.x, windowEvent.motion.y);
 
-                            if (lastMoveTick == 0) {
-                                lastMoveTick = SDL_GetTicks64(); // Start recording the time
+                            if (startTick == 0) {
+                                startTick = SDL_GetTicks64(); // Start recording the time
                             }
 
                             if (!game.move(coords.first, coords.second)) {
-                                gameInProgress = false;
+                                game.reset(2);
                             }
                             else if (game.checkWin()) {
-                                gameInProgress = false;
-                                win = true;
-
-                                // Select high score from database
-                                Result result;
-                                std::string sqlCommand = "SELECT timed from players where name = \"local\"";
-                                sqlite3_exec(scoresDB, sqlCommand.c_str(), callback, &result, NULL);
-
-                                if (result.resultingCall == 0 || selectedTime < result.resultingCall) {
-                                    // Update high score
-                                    sqlCommand = "UPDATE players set timed = "+std::to_string(selectedTime)+" where name=\"local\"";
-                                    sqlite3_exec(scoresDB, sqlCommand.c_str(), callback, &result, NULL);
-                                }
-                            }
-                            else {
-                                lastMoveTick = SDL_GetTicks64(); // Reset timer every move
+                                solvedCount++;
+                                game.reset(2);
                             }
                         }
                     }
@@ -185,14 +103,26 @@ std::string Timed::runTimed()
         drawBackground(add); // Checkerboard
 
         // ---------------------------------------
-        if ((SDL_GetTicks64()-lastMoveTick)/1000 == selectedTime) {
+        if ((SDL_GetTicks64()-startTick)/1000 == 30) {
             gameInProgress = false;
+
+            // Select high score from database
+            Result result;
+            std::string sqlCommand = "SELECT four from players where name = \"local\"";
+            sqlite3_exec(scoresDB, sqlCommand.c_str(), callback, &result, NULL);
+            
+            if (result.resultingCall == 0 || solvedCount > result.resultingCall) {
+                // Update high score
+                sqlCommand = "UPDATE players set four = "+std::to_string(solvedCount)+" where name=\"local\"";
+                sqlite3_exec(scoresDB, sqlCommand.c_str(), callback, &result, NULL);
+                win = true;
+            }
         }
 
         if (gameInProgress) {
             SDL_RenderCopy(renderer, shadow, NULL, NULL);
             drawGameBoard(game.getBoard());
-            drawStats(lastMoveTick);
+            drawStats(startTick, solvedCount);
         }
         else {
             if (win) {
@@ -216,7 +146,7 @@ std::string Timed::runTimed()
                 SDL_RenderCopy(renderer, overlay, NULL, NULL);
                 SDL_DestroyTexture(overlay);
 
-                drawStatsGameOver(selectedTime);
+                drawStatsGameOver(30, solvedCount);
             }
             else {
                 SDL_RenderCopy(renderer, shadow, NULL, NULL);
@@ -239,7 +169,7 @@ std::string Timed::runTimed()
                 SDL_RenderCopy(renderer, overlay, NULL, NULL);
                 SDL_DestroyTexture(overlay);
 
-                drawStatsGameOver(selectedTime);
+                drawStatsGameOver(30, solvedCount);
             }
         }
         // ---------------------------------------
@@ -259,7 +189,7 @@ std::string Timed::runTimed()
 // ------------------------------------------------------------
 
 
-void Timed::drawStats(int startTick)
+void Four::drawStats(int startTick, int solvedCount)
 {
     // Draw logo at top
     SDL_Rect logo_rect{WIDTH/4, 0, 365, 100};
@@ -291,6 +221,32 @@ void Timed::drawStats(int startTick)
     SDL_RenderCopy(renderer, countTexture, NULL, &countRect);
     SDL_FreeSurface(flagCount);
     SDL_DestroyTexture(countTexture);
+
+    // Draw checkmark
+    SDL_Rect checkmark_rect{WIDTH/2-50, HEIGHT-150, 50, 50};
+    SDL_RenderCopy(renderer, checkmark, NULL, &checkmark_rect);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_Rect checkmark_outline{WIDTH/2-50, HEIGHT-150, 50, 50};
+    SDL_RenderDrawRect(renderer, &checkmark_outline);
+    // Draw solvedCount
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_Rect countBg{WIDTH/2, HEIGHT-150, 50, 50};
+    SDL_RenderFillRect(renderer, &countBg);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_Rect countBgOutline{WIDTH/2, HEIGHT-150, 50, 50};
+    SDL_RenderDrawRect(renderer, &countBgOutline);
+    SDL_Surface* solvedCountSurface = TTF_RenderText_Solid(font, std::to_string(solvedCount).c_str(), {0, 0, 0});
+    SDL_Texture* solvedCountTexture = SDL_CreateTextureFromSurface(renderer, solvedCountSurface);
+    SDL_Rect solvedCountRect;
+    if (solvedCount > 9) {
+        solvedCountRect = SDL_Rect{WIDTH/2+2, HEIGHT-150, 50, 50};
+    }
+    else {
+        solvedCountRect = SDL_Rect{WIDTH/2+14, HEIGHT-150, 25, 50};
+    }
+    SDL_RenderCopy(renderer, solvedCountTexture, NULL, &solvedCountRect);
+    SDL_FreeSurface(solvedCountSurface);
+    SDL_DestroyTexture(solvedCountTexture);
 
     // Draw time
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
@@ -346,9 +302,9 @@ void Timed::drawStats(int startTick)
     SDL_Rect trophyRect{500, HEIGHT-75, 50, 50};
     SDL_RenderCopy(renderer, trophy, NULL, &trophyRect);
     SDL_DestroyTexture(trophy);
-    // Select timed high score
+    // Select four high score
     Result result;
-    std::string sqlCommand = "SELECT timed from players where name = \"local\"";
+    std::string sqlCommand = "SELECT four from players where name = \"local\"";
     sqlite3_exec(scoresDB, sqlCommand.c_str(), callback, &result, NULL);
     SDL_Rect hsRect;
     SDL_Surface* hsSurface;
@@ -379,7 +335,7 @@ void Timed::drawStats(int startTick)
 }
 
 
-void Timed::drawStatsGameOver(int time) 
+void Four::drawStatsGameOver(int time, int solvedCount) 
 {
     // Draw clock
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
@@ -413,6 +369,32 @@ void Timed::drawStatsGameOver(int time)
     SDL_FreeSurface(timer);
     SDL_DestroyTexture(timerTexture);
 
+    // Draw checkmark
+    SDL_Rect checkmark_rect{WIDTH/2-50, HEIGHT-75, 50, 50};
+    SDL_RenderCopy(renderer, checkmark, NULL, &checkmark_rect);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_Rect checkmark_outline{WIDTH/2-50, HEIGHT-75, 50, 50};
+    SDL_RenderDrawRect(renderer, &checkmark_outline);
+    // Draw solvedCount
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_Rect countBg{WIDTH/2, HEIGHT-75, 50, 50};
+    SDL_RenderFillRect(renderer, &countBg);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_Rect countBgOutline{WIDTH/2, HEIGHT-75, 50, 50};
+    SDL_RenderDrawRect(renderer, &countBgOutline);
+    SDL_Surface* solvedCountSurface = TTF_RenderText_Solid(font, std::to_string(solvedCount).c_str(), {0, 0, 0});
+    SDL_Texture* solvedCountTexture = SDL_CreateTextureFromSurface(renderer, solvedCountSurface);
+    SDL_Rect solvedCountRect;
+    if (solvedCount > 9) {
+        solvedCountRect = SDL_Rect{WIDTH/2+2, HEIGHT-75, 50, 50};
+    }
+    else {
+        solvedCountRect = SDL_Rect{WIDTH/2+14, HEIGHT-75, 25, 50};
+    }
+    SDL_RenderCopy(renderer, solvedCountTexture, NULL, &solvedCountRect);
+    SDL_FreeSurface(solvedCountSurface);
+    SDL_DestroyTexture(solvedCountTexture);
+
     // Draw high score
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_Rect hsRectBg{500, HEIGHT-75, 200, 50};
@@ -424,9 +406,9 @@ void Timed::drawStatsGameOver(int time)
     SDL_Rect trophyRect{500, HEIGHT-75, 50, 50};
     SDL_RenderCopy(renderer, trophy, NULL, &trophyRect);
     SDL_DestroyTexture(trophy);
-    // Select timed high score
+    // Select four high score
     Result result;
-    std::string sqlCommand = "SELECT timed from players where name = \"local\"";
+    std::string sqlCommand = "SELECT four from players where name = \"local\"";
     sqlite3_exec(scoresDB, sqlCommand.c_str(), callback, &result, NULL);
     SDL_Rect hsRect;
     SDL_Surface* hsSurface;
@@ -457,12 +439,12 @@ void Timed::drawStatsGameOver(int time)
 }
 
 
-void Timed::drawGameBoardAll(const std::vector<std::vector<Minesweeper::Cell>>& board) 
+void Four::drawGameBoardAll(const std::vector<std::vector<Minesweeper::Cell>>& board) 
 {
     int size = 50;
-    int start_x = 100;
+    int start_x = 300;
     int x = start_x;
-    int y = 100;
+    int y = 200;
 
     for (auto& row : board) {
         for (auto& cell : row) {
@@ -510,12 +492,12 @@ void Timed::drawGameBoardAll(const std::vector<std::vector<Minesweeper::Cell>>& 
 }
 
 
-void Timed::drawGameBoard(const std::vector<std::vector<Minesweeper::Cell>>& board) 
+void Four::drawGameBoard(const std::vector<std::vector<Minesweeper::Cell>>& board) 
 {
     int size = 50;
-    int start_x = 100;
+    int start_x = 300;
     int x = start_x;
-    int y = 100;
+    int y = 200;
 
     for (auto& row : board) {
         for (auto& cell : row) {
@@ -572,7 +554,7 @@ void Timed::drawGameBoard(const std::vector<std::vector<Minesweeper::Cell>>& boa
 }
 
 
-void Timed::drawBackground(int add)
+void Four::drawBackground(int add)
 {
     // int size = 50; // For scaling purposes
     int size = 25;
@@ -583,11 +565,11 @@ void Timed::drawBackground(int add)
     for (int i=0; i<40; ++i) {
         for (int j=0; j<40; ++j) {
             if (dark_purple) {
-                SDL_SetRenderDrawColor(renderer, 189, 144, 143, 255);
+                SDL_SetRenderDrawColor(renderer, 120, 73, 209, 255);
                 dark_purple = false;
             }
             else {
-                SDL_SetRenderDrawColor(renderer, 196, 151, 150, 255);
+                SDL_SetRenderDrawColor(renderer, 126, 81, 215, 255);
                 dark_purple = true;
             }
 
@@ -602,11 +584,11 @@ void Timed::drawBackground(int add)
 }
 
 
-std::pair<unsigned, unsigned> Timed::getCellCoords(const int& x, const int& y)
+std::pair<unsigned, unsigned> Four::getCellCoords(const int& x, const int& y)
 {
     int cell_row = 0;
-    int counter = 100;
-    for (int i=0; i<8; ++i) {
+    int counter = 200;
+    for (int i=0; i<4; ++i) {
         if (y-counter <= 50) {
             break;
         }
@@ -616,8 +598,8 @@ std::pair<unsigned, unsigned> Timed::getCellCoords(const int& x, const int& y)
     }
 
     int cell_col = 0;
-    counter = 100;
-    for (int i=0; i<12; ++i) {
+    counter = 300;
+    for (int i=0; i<4; ++i) {
         if (x-counter <= 50) {
             break;
         }
