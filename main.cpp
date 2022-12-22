@@ -13,6 +13,7 @@
 
 #include "Minesweeper.hpp"
 #include "NormalGame.hpp"
+#include "TimedGame.hpp"
 
 
 const int WIDTH = 800;
@@ -124,6 +125,18 @@ int main(int argc, char *argv[])
                 }
                 else if ( (450 <= windowEvent.motion.x && windowEvent.motion.x <= 650) && (350 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
                     // Timed
+                    bool running_timed = true;
+                    while (running_timed) {
+                        Timed game(window, renderer, windowEvent, Pixelated, scoresDB);
+                        std::string choice = game.runTimed();
+                        if (choice == "CLOSE") {
+                            running = false;
+                            running_timed = false;
+                        }
+                        else if (choice == "BACK") {
+                            running_timed = false;
+                        }
+                    }
                 }
 
             }

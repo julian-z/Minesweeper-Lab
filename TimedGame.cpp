@@ -1,13 +1,14 @@
-// NormalGame.cpp -- Julian Zulfikar, 2022
+// TimedGame.cpp -- Julian Zulfikar, 2022
 // ------------------------------------------------------
-// Normal gamemode definitions.
+// Timed gamemode definitions.
 
-#include "NormalGame.hpp"
+#include "TimedGame.hpp"
 
 
-Normal::Normal(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont, sqlite3* initDB)
+Timed::Timed(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont, sqlite3* initDB)
 : window{initWindow}, renderer{initRenderer}, windowEvent{initEvent}, font{initFont}, scoresDB{initDB}
 {
+    timedSelection = IMG_LoadTexture(renderer, "textures/minesweeperlabtimedselection.png");
     shadow = IMG_LoadTexture(renderer, "textures/boardshadow.png");
     square = IMG_LoadTexture(renderer, "textures/graysquare.png");
     flag = IMG_LoadTexture(renderer, "textures/graysquareflag.png");
@@ -16,8 +17,9 @@ Normal::Normal(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event ini
 }
 
 
-Normal::~Normal()
+Timed::~Timed()
 {
+    SDL_DestroyTexture(timedSelection);
     SDL_DestroyTexture(shadow);
     SDL_DestroyTexture(square);
     SDL_DestroyTexture(flag);
@@ -26,13 +28,72 @@ Normal::~Normal()
 }
 
 
-std::string Normal::runNormal()
+std::string Timed::runTimed()
 {
     int add = 0;
+
+    // Select time
+    int selectedTime = 10; // Min = 1, max = 999
+    bool selecting = true;
+    while (selecting) {
+        while (SDL_PollEvent(&windowEvent)) {
+            if (windowEvent.type == SDL_QUIT)
+            {
+                return "CLOSE"; // Signal to close window in main.cpp
+            }
+            if (windowEvent.type == SDL_MOUSEBUTTONDOWN) {
+                if ( (200 <= windowEvent.motion.x && windowEvent.motion.x <= 250) && (300 <= windowEvent.motion.y && windowEvent.motion.y <= 350) ) {
+                    selectedTime = (1 <= selectedTime-1 && selectedTime-1 <= 999) ? selectedTime-1 : 999;
+                }
+                else if ( (250 <= windowEvent.motion.x && windowEvent.motion.x <= 300) && (300 <= windowEvent.motion.y && windowEvent.motion.y <= 350) ) {
+                    selectedTime = (1 <= selectedTime+1 && selectedTime+1 <= 999) ? selectedTime+1 : 1;
+                }
+                else if ( (500 <= windowEvent.motion.x && windowEvent.motion.x <= 600) && (300 <= windowEvent.motion.y && windowEvent.motion.y <= 350) ) {
+                    selecting = false;
+                }
+            }
+        }
+
+        // ------------------------
+
+        SDL_RenderClear(renderer);
+
+        drawBackground(add); // Checkerboard
+
+        SDL_RenderCopy(renderer, timedSelection, NULL, NULL);
+        SDL_Surface* selectionSurface = TTF_RenderText_Solid(font, std::to_string(selectedTime).c_str(), {0, 0, 0});
+        SDL_Texture* selectionTexture = SDL_CreateTextureFromSurface(renderer, selectionSurface);
+        SDL_Rect selectionRect;
+        if (selectedTime > 9) {
+            selectionRect = SDL_Rect{450, 300, 50, 50};
+        }
+        else if (selectedTime > 99) {
+            selectionRect = SDL_Rect{425, 300, 100, 50};
+        }
+        else {
+            selectionRect = SDL_Rect{475, 300, 25, 50};
+        }
+        SDL_RenderCopy(renderer, selectionTexture, NULL, &selectionRect);
+        SDL_FreeSurface(selectionSurface);
+        SDL_DestroyTexture(selectionTexture);
+
+        SDL_RenderPresent(renderer);
+
+        // ------------------------
+
+        if (add == -100) {
+            add = -1;
+        }
+        else {
+            add--; // Moving background
+        }
+        SDL_Delay(50);
+    }
+
+    // Run Timed gamemode
     bool gameInProgress = true;
-    int startTick = 0;
+    int lastMoveTick = 0;
     bool win = false;
-    int finishingTime = 0;
     int hover = 0;
 
     while (true)
@@ -49,33 +110,30 @@ std::string Normal::runNormal()
                         if ( (100 <= windowEvent.motion.x && windowEvent.motion.x <= 700) && (100 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
                             auto coords = getCellCoords(windowEvent.motion.x, windowEvent.motion.y);
 
-                            if (startTick == 0) {
-                                startTick = SDL_GetTicks64(); // Start recording the time
+                            if (lastMoveTick == 0) {
+                                lastMoveTick = SDL_GetTicks64(); // Start recording the time
                             }
 
                             if (!game.move(coords.first, coords.second)) {
-                                if (startTick != 0) {
-                                    finishingTime = (SDL_GetTicks64()-startTick)/1000;
-                                }
                                 gameInProgress = false;
                             }
                             else if (game.checkWin()) {
-                                if (startTick != 0) {
-                                    finishingTime = (SDL_GetTicks64()-startTick)/1000;
-                                }
                                 gameInProgress = false;
                                 win = true;
 
                                 // Select high score from database
                                 Result result;
-                                std::string sqlCommand = "SELECT normal from players where name = \"local\"";
+                                std::string sqlCommand = "SELECT timed from players where name = \"local\"";
                                 sqlite3_exec(scoresDB, sqlCommand.c_str(), callback, &result, NULL);
 
-                                if (result.resultingCall == 0 || finishingTime < result.resultingCall) {
+                                if (result.resultingCall == 0 || selectedTime < result.resultingCall) {
                                     // Update high score
-                                    sqlCommand = "UPDATE players set normal = "+std::to_string(finishingTime)+" where name=\"local\"";
+                                    sqlCommand = "UPDATE players set timed = "+std::to_string(selectedTime)+" where name=\"local\"";
                                     sqlite3_exec(scoresDB, sqlCommand.c_str(), callback, &result, NULL);
                                 }
+                            }
+                            else {
+                                lastMoveTick = SDL_GetTicks64(); // Reset timer every move
                             }
                         }
                     }
@@ -118,10 +176,14 @@ std::string Normal::runNormal()
         drawBackground(add); // Checkerboard
 
         // ---------------------------------------
+        if ((SDL_GetTicks64()-lastMoveTick)/1000 == selectedTime) {
+            gameInProgress = false;
+        }
+
         if (gameInProgress) {
             SDL_RenderCopy(renderer, shadow, NULL, NULL);
             drawGameBoard(game.getBoard());
-            drawStats(startTick);
+            drawStats(lastMoveTick);
         }
         else {
             if (win) {
@@ -145,7 +207,7 @@ std::string Normal::runNormal()
                 SDL_RenderCopy(renderer, overlay, NULL, NULL);
                 SDL_DestroyTexture(overlay);
 
-                drawStatsGameOver(finishingTime);
+                drawStatsGameOver(selectedTime);
             }
             else {
                 SDL_RenderCopy(renderer, shadow, NULL, NULL);
@@ -168,7 +230,7 @@ std::string Normal::runNormal()
                 SDL_RenderCopy(renderer, overlay, NULL, NULL);
                 SDL_DestroyTexture(overlay);
 
-                drawStatsGameOver(finishingTime);
+                drawStatsGameOver(selectedTime);
             }
         }
         // ---------------------------------------
@@ -188,7 +250,7 @@ std::string Normal::runNormal()
 // ------------------------------------------------------------
 
 
-void Normal::drawStats(int startTick)
+void Timed::drawStats(int startTick)
 {
     // Draw logo at top
     SDL_Rect logo_rect{WIDTH/4, 0, 365, 100};
@@ -275,9 +337,9 @@ void Normal::drawStats(int startTick)
     SDL_Rect trophyRect{500, HEIGHT-75, 50, 50};
     SDL_RenderCopy(renderer, trophy, NULL, &trophyRect);
     SDL_DestroyTexture(trophy);
-    // Select normal high score
+    // Select timed high score
     Result result;
-    std::string sqlCommand = "SELECT normal from players where name = \"local\"";
+    std::string sqlCommand = "SELECT timed from players where name = \"local\"";
     sqlite3_exec(scoresDB, sqlCommand.c_str(), callback, &result, NULL);
     SDL_Rect hsRect;
     SDL_Surface* hsSurface;
@@ -308,7 +370,7 @@ void Normal::drawStats(int startTick)
 }
 
 
-void Normal::drawStatsGameOver(int time) 
+void Timed::drawStatsGameOver(int time) 
 {
     // Draw clock
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
@@ -353,9 +415,9 @@ void Normal::drawStatsGameOver(int time)
     SDL_Rect trophyRect{500, HEIGHT-75, 50, 50};
     SDL_RenderCopy(renderer, trophy, NULL, &trophyRect);
     SDL_DestroyTexture(trophy);
-    // Select normal high score
+    // Select timed high score
     Result result;
-    std::string sqlCommand = "SELECT normal from players where name = \"local\"";
+    std::string sqlCommand = "SELECT timed from players where name = \"local\"";
     sqlite3_exec(scoresDB, sqlCommand.c_str(), callback, &result, NULL);
     SDL_Rect hsRect;
     SDL_Surface* hsSurface;
@@ -386,7 +448,7 @@ void Normal::drawStatsGameOver(int time)
 }
 
 
-void Normal::drawGameBoardAll(const std::vector<std::vector<Minesweeper::Cell>>& board) 
+void Timed::drawGameBoardAll(const std::vector<std::vector<Minesweeper::Cell>>& board) 
 {
     int size = 50;
     int start_x = 100;
@@ -439,7 +501,7 @@ void Normal::drawGameBoardAll(const std::vector<std::vector<Minesweeper::Cell>>&
 }
 
 
-void Normal::drawGameBoard(const std::vector<std::vector<Minesweeper::Cell>>& board) 
+void Timed::drawGameBoard(const std::vector<std::vector<Minesweeper::Cell>>& board) 
 {
     int size = 50;
     int start_x = 100;
@@ -501,23 +563,23 @@ void Normal::drawGameBoard(const std::vector<std::vector<Minesweeper::Cell>>& bo
 }
 
 
-void Normal::drawBackground(int add)
+void Timed::drawBackground(int add)
 {
     // int size = 50; // For scaling purposes
     int size = 25;
     int x = 0+add;
     int y = 0;
-    bool dark_green = true;
+    bool dark_purple = true;
 
     for (int i=0; i<40; ++i) {
         for (int j=0; j<40; ++j) {
-            if (dark_green) {
-                SDL_SetRenderDrawColor(renderer, 162, 209, 73, 255);
-                dark_green = false;
+            if (dark_purple) {
+                SDL_SetRenderDrawColor(renderer, 189, 144, 143, 255);
+                dark_purple = false;
             }
             else {
-                SDL_SetRenderDrawColor(renderer, 170, 215, 81, 255);
-                dark_green = true;
+                SDL_SetRenderDrawColor(renderer, 196, 151, 150, 255);
+                dark_purple = true;
             }
 
             SDL_Rect rect{x, y, size, size};
@@ -526,12 +588,12 @@ void Normal::drawBackground(int add)
         }
         x = 0+add;
         y += size;
-        dark_green = !dark_green;
+        dark_purple = !dark_purple;
     }
 }
 
 
-std::pair<unsigned, unsigned> Normal::getCellCoords(const int& x, const int& y)
+std::pair<unsigned, unsigned> Timed::getCellCoords(const int& x, const int& y)
 {
     int cell_row = 0;
     int counter = 100;
