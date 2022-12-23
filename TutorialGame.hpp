@@ -21,6 +21,8 @@ class Tutorial
 {
 private:
     SDL_Texture* AIoutline = nullptr;
+    SDL_Texture* AIglow = nullptr;
+    SDL_Texture* AIglowgreen = nullptr;
 
     SDL_Texture* logo = nullptr;
     SDL_Texture* shadow = nullptr;

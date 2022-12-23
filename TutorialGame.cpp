@@ -8,6 +8,8 @@
 Tutorial::Tutorial(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont)
 : window{initWindow}, renderer{initRenderer}, windowEvent{initEvent}, font{initFont}
 {
+    AIglowgreen = IMG_LoadTexture(renderer, "textures/inspectingglowgreen.png");
+    AIglow = IMG_LoadTexture(renderer, "textures/inspectingglow.png");
     AIoutline = IMG_LoadTexture(renderer, "textures/inspectingoutline.png");
     shadow = IMG_LoadTexture(renderer, "textures/boardshadow.png");
     square = IMG_LoadTexture(renderer, "textures/graysquare.png");
@@ -19,6 +21,8 @@ Tutorial::Tutorial(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event
 
 Tutorial::~Tutorial()
 {
+    SDL_DestroyTexture(AIglowgreen);
+    SDL_DestroyTexture(AIglow);
     SDL_DestroyTexture(AIoutline);
     SDL_DestroyTexture(shadow);
     SDL_DestroyTexture(square);
@@ -249,8 +253,18 @@ void Tutorial::drawGameBoardAll(const std::vector<std::vector<MinesweeperAI::Cel
 }
 
 
+struct pair_hash {
+    inline std::size_t operator()(const std::pair<int,int> & v) const {
+        return v.first*31+v.second;
+    }
+};
 void Tutorial::drawMove(const std::pair<unsigned, unsigned>& move)
 {
+    std::unordered_set<std::pair<unsigned, unsigned>, pair_hash> radius;
+    for (auto coord : game.getRadiusCoords(move.first, move.second)) {
+        radius.insert(coord);
+    }
+
     int size = 50;
     int start_x = 100;
     int x = start_x;
@@ -262,7 +276,18 @@ void Tutorial::drawMove(const std::pair<unsigned, unsigned>& move)
                 // Draw outline
                 SDL_Rect square_rect{x, y, size, size};
                 SDL_RenderCopy(renderer, AIoutline, NULL, &square_rect);
-                return;
+            }
+            if (radius.count(std::pair<unsigned, unsigned>{curX, curY})) {
+                if (!game.getBoard()[curX][curY].revealed) {
+                    // Draw yellow glow
+                    SDL_Rect glow_rect{x, y, size, size};
+                    SDL_RenderCopy(renderer, AIglow, NULL, &glow_rect);
+                }
+                else {
+                    // Draw green glow
+                    SDL_Rect glow_rect{x, y, size, size};
+                    SDL_RenderCopy(renderer, AIglowgreen, NULL, &glow_rect);
+                }
             }
 
             x += size;

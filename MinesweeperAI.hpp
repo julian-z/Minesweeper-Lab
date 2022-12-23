@@ -74,6 +74,9 @@ public:
     // Set to a given gameboard
     void setGameBoard(std::vector<std::vector<Cell>> newBoard);
 
+    // Return coords in radius (for glow overlay)
+    std::vector<std::pair<unsigned, unsigned>> getRadiusCoords(const unsigned& x, const unsigned& y);
+
 private:
     unsigned numRows;
     unsigned numCols;

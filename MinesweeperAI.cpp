@@ -14,58 +14,55 @@
 
 
 // Helper functions
-namespace {
-    std::vector<std::pair<unsigned, unsigned>> getRadiusCoords(const unsigned& x, const unsigned& y, 
-                                                                const unsigned& numRows, const unsigned& numCols)
-    {
-        std::vector<std::pair<unsigned, unsigned>> coords;
+std::vector<std::pair<unsigned, unsigned>> MinesweeperAI::getRadiusCoords(const unsigned& x, const unsigned& y)
+{
+    std::vector<std::pair<unsigned, unsigned>> coords;
 
-        // Above row
-        if (x > 0) {
-            unsigned topX = x-1;
+    // Above row
+    if (x > 0) {
+        unsigned topX = x-1;
 
-            // Above middle
-            coords.push_back(std::pair<unsigned, unsigned>{topX, y});
+        // Above middle
+        coords.push_back(std::pair<unsigned, unsigned>{topX, y});
 
-            // Above left
-            if (y > 0) {
-                coords.push_back(std::pair<unsigned, unsigned>{topX, y-1});
-            }
-
-            // Above right
-            if (y < numCols-1) {
-                coords.push_back(std::pair<unsigned, unsigned>{topX, y+1});
-            }
-        }
-
-        // Left and right
+        // Above left
         if (y > 0) {
-            coords.push_back(std::pair<unsigned, unsigned>{x, y-1});
+            coords.push_back(std::pair<unsigned, unsigned>{topX, y-1});
         }
+
+        // Above right
         if (y < numCols-1) {
-            coords.push_back(std::pair<unsigned, unsigned>{x, y+1});
+            coords.push_back(std::pair<unsigned, unsigned>{topX, y+1});
         }
-
-        // Below row
-        if (x < numRows-1) {
-            unsigned belowX = x+1;
-
-            // Below middle
-            coords.push_back(std::pair<unsigned, unsigned>{belowX, y});
-
-            // Below left
-            if (y > 0) {
-                coords.push_back(std::pair<unsigned, unsigned>{belowX, y-1});
-            }
-
-            // Below right
-            if (y < numCols-1) {
-                coords.push_back(std::pair<unsigned, unsigned>{belowX, y+1});
-            }
-        }
-
-        return coords;
     }
+
+    // Left and right
+    if (y > 0) {
+        coords.push_back(std::pair<unsigned, unsigned>{x, y-1});
+    }
+    if (y < numCols-1) {
+        coords.push_back(std::pair<unsigned, unsigned>{x, y+1});
+    }
+
+    // Below row
+    if (x < numRows-1) {
+        unsigned belowX = x+1;
+
+        // Below middle
+        coords.push_back(std::pair<unsigned, unsigned>{belowX, y});
+
+        // Below left
+        if (y > 0) {
+            coords.push_back(std::pair<unsigned, unsigned>{belowX, y-1});
+        }
+
+        // Below right
+        if (y < numCols-1) {
+            coords.push_back(std::pair<unsigned, unsigned>{belowX, y+1});
+        }
+    }
+
+    return coords;
 }
 
 
@@ -100,7 +97,7 @@ numNotRevealed{(initRows*initCols)-initBombs}
         }
 
         // num++ all Cells in radius of [row][col]
-        for (const std::pair<unsigned, unsigned>& coord : getRadiusCoords(row, col, numRows, numCols)) {
+        for (const std::pair<unsigned, unsigned>& coord : getRadiusCoords(row, col)) {
             gameBoard[coord.first][coord.second].num++;
         }
     }
@@ -257,7 +254,7 @@ void MinesweeperAI::floodFill(unsigned x, unsigned y)
     }
 
     revealCell(x, y);
-    for (const std::pair<unsigned, unsigned>& coord : getRadiusCoords(x, y, numRows, numCols)) {
+    for (const std::pair<unsigned, unsigned>& coord : getRadiusCoords(x, y)) {
         if (gameBoard[coord.first][coord.second].num != 0) {
             revealCell(coord.first, coord.second);
         }
@@ -321,7 +318,7 @@ int MinesweeperAI::move()
                 int numHidden = 0;
                 std::vector<std::pair<unsigned, unsigned>> hiddenCells;
 
-                for (auto coord : getRadiusCoords(x, y, numRows, numCols)) {
+                for (auto coord : getRadiusCoords(x, y)) {
                     if (!gameBoard[coord.first][coord.second].revealed && !gameBoard[coord.first][coord.second].flag) {
                         numHidden++;
                         hiddenCells.push_back(coord);
@@ -353,7 +350,7 @@ int MinesweeperAI::move()
                 int numFlags = 0;
                 std::vector<std::pair<unsigned, unsigned>> hiddenCells;
 
-                for (auto coord : getRadiusCoords(x, y, numRows, numCols)) {
+                for (auto coord : getRadiusCoords(x, y)) {
                     if (gameBoard[coord.first][coord.second].flag) {
                         numFlags++;
                     }
@@ -413,7 +410,7 @@ void MinesweeperAI::reset(unsigned initBombs)
         }
 
         // num++ all Cells in radius of [row][col]
-        for (const std::pair<unsigned, unsigned>& coord : getRadiusCoords(row, col, numRows, numCols)) {
+        for (const std::pair<unsigned, unsigned>& coord : getRadiusCoords(row, col)) {
             gameBoard[coord.first][coord.second].num++;
         }
     }
