@@ -12,6 +12,7 @@
 #include "SQLHelpers.hpp"
 
 #include "Minesweeper.hpp"
+#include "TutorialGame.hpp"
 #include "NormalGame.hpp"
 #include "TimedGame.hpp"
 #include "FourGame.hpp"
@@ -69,8 +70,8 @@ int main(int argc, char *argv[])
     // Initialization
     // ---------------------------------------
     sqlite3* scoresDB;
-    // sqlite3_open("scoresdev.db", &scoresDB); // DEVELOPER MODE
-    sqlite3_open("scores.db", &scoresDB); // LOCAL PLAYER
+    sqlite3_open("scoresdev.db", &scoresDB); // DEVELOPER MODE
+    // sqlite3_open("scores.db", &scoresDB); // LOCAL PLAYER
 
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window* window = SDL_CreateWindow("Minesweeper Lab", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
@@ -120,7 +121,18 @@ int main(int argc, char *argv[])
                 }
                 else if ( (150 <= windowEvent.motion.x && windowEvent.motion.x <= 350) && (150 <= windowEvent.motion.y && windowEvent.motion.y <= 300) ) {
                     // Tutorial
-                    // ...
+                    bool running_tutorial = true;
+                    while (running_tutorial) {
+                        Tutorial game(window, renderer, windowEvent, Pixelated, scoresDB);
+                        std::string choice = game.runTutorial();
+                        if (choice == "CLOSE") {
+                            running = false;
+                            running_tutorial = false;
+                        }
+                        else if (choice == "BACK") {
+                            running_tutorial = false;
+                        }
+                    }
                 }
                 else if ( (150 <= windowEvent.motion.x && windowEvent.motion.x <= 350) && (350 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
                     // 4x4
