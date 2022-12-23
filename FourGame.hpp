@@ -59,6 +59,8 @@ private:
     void drawGameBoard(const std::vector<std::vector<Minesweeper::Cell>>& board);
 
     void drawBackground(int add);
+    void drawBackgroundWin(int add);
+    void drawBackgroundLost(int add);
 
     std::pair<unsigned, unsigned> getCellCoords(const int& x, const int& y);
 

@@ -56,10 +56,32 @@ std::string Four::runFour()
                             }
 
                             if (!game.move(coords.first, coords.second)) {
+
+                                SDL_RenderClear(renderer);
+
+                                drawBackgroundLost(add); // Checkerboard
+                                SDL_RenderCopy(renderer, shadow, NULL, NULL);
+                                drawGameBoardAll(game.getBoard());
+                                drawStats(startTick, solvedCount);
+
+                                SDL_RenderPresent(renderer);
+                                SDL_Delay(500);
+
                                 game.reset(2);
                             }
                             else if (game.checkWin()) {
                                 solvedCount++;
+
+                                SDL_RenderClear(renderer);
+
+                                drawBackgroundWin(add); // Checkerboard
+                                SDL_RenderCopy(renderer, shadow, NULL, NULL);
+                                drawGameBoardAll(game.getBoard());
+                                drawStats(startTick, solvedCount);
+                                
+                                SDL_RenderPresent(renderer);
+                                SDL_Delay(500);
+
                                 game.reset(2);
                             }
                         }
@@ -580,6 +602,65 @@ void Four::drawBackground(int add)
         x = 0+add;
         y += size;
         dark_purple = !dark_purple;
+    }
+}
+
+
+void Four::drawBackgroundWin(int add)
+{
+    // int size = 50; // For scaling purposes
+    int size = 25;
+    int x = 0+add;
+    int y = 0;
+    bool dark_green = true;
+
+    for (int i=0; i<40; ++i) {
+        for (int j=0; j<40; ++j) {
+            if (dark_green) {
+                SDL_SetRenderDrawColor(renderer, 73, 209, 77, 255);
+                dark_green = false;
+            }
+            else {
+                SDL_SetRenderDrawColor(renderer, 81, 215, 84, 255);
+                dark_green = true;
+            }
+
+            SDL_Rect rect{x, y, size, size};
+            SDL_RenderFillRect(renderer, &rect);
+            x += size;
+        }
+        x = 0+add;
+        y += size;
+        dark_green = !dark_green;
+    }
+}
+
+void Four::drawBackgroundLost(int add)
+{
+    // int size = 50; // For scaling purposes
+    int size = 25;
+    int x = 0+add;
+    int y = 0;
+    bool dark_red = true;
+
+    for (int i=0; i<40; ++i) {
+        for (int j=0; j<40; ++j) {
+            if (dark_red) {
+                SDL_SetRenderDrawColor(renderer, 209, 73, 74, 255);
+                dark_red = false;
+            }
+            else {
+                SDL_SetRenderDrawColor(renderer, 215, 81, 82, 255);
+                dark_red = true;
+            }
+
+            SDL_Rect rect{x, y, size, size};
+            SDL_RenderFillRect(renderer, &rect);
+            x += size;
+        }
+        x = 0+add;
+        y += size;
+        dark_red = !dark_red;
     }
 }
 
