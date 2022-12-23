@@ -1,5 +1,5 @@
 ![](https://github.com/julian-z/Minesweeper-Lab/blob/main/textures/minesweeperlablogo.png)
-Created by Julian Zulfikar, January 2022.
+Created by Julian Zulfikar, January 2023.
 
 # About
 Minesweeper Lab is a recreation of the 1989 puzzle game, Minesweeper. In this version, there includes a training aspect: 3x3 gamemode & timed trials. The program is built to help train the user to solve Minesweeper puzzles faster.

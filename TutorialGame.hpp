@@ -38,7 +38,7 @@ private:
 
     const unsigned rows = 8;
     const unsigned cols = 12;
-    const unsigned bombs = 7;
+    const unsigned bombs = 12;
     MinesweeperAI game{rows, cols, bombs};
 
     const int WIDTH = 800;

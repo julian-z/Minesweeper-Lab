@@ -122,6 +122,9 @@ std::string Tutorial::runTutorial()
                     if ( (325 <= windowEvent.motion.x && windowEvent.motion.x <= 475) && (525 <= windowEvent.motion.y && windowEvent.motion.y <= 575) ) {
                         auto og_board = game.getBoard();
                         int rule = game.move();
+
+                        // std::cout << rule << std::endl;
+
                         if (game.checkWin() || rule == -1) {
                             gameInProgress = false;
                         }

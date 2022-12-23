@@ -1,4 +1,4 @@
-// MinesweeperAI.cpp -- Julian Zulfikar, 2022
+// MinesweeperAI.cpp -- Julian Zulfikar, 2023
 // ------------------------------------------------------
 // Modified game functionality for tutorial AI.
 //
@@ -346,7 +346,7 @@ int MinesweeperAI::move()
         for (unsigned y=0; y<numCols; ++y) {
             int num = gameBoard[x][y].num;
 
-            if (num != 0 && !inspected.count(std::pair<unsigned, unsigned>{x, y})) {
+            if (num != 0 && !inspected.count(std::pair<unsigned, unsigned>{x, y}) && gameBoard[x][y].revealed) {
                 int numFlags = 0;
                 std::vector<std::pair<unsigned, unsigned>> hiddenCells;
 
@@ -366,6 +366,23 @@ int MinesweeperAI::move()
                     currentMove = std::pair<unsigned, unsigned>{x, y};
                     inspected.insert(currentMove);
                     return 2;
+                }
+            }
+        }
+    }
+
+    // Rule 3
+    for (unsigned x=0; x<numRows; ++x) {
+        for (unsigned y=0; y<numCols; ++y) {
+            int num = gameBoard[x][y].num;
+
+            if (num != 0 && !inspected.count(std::pair<unsigned, unsigned>{x, y}) && gameBoard[x][y].revealed) {
+                for (auto coord : getRadiusCoords(x, y)) {
+                    if (!gameBoard[coord.first][coord.second].revealed && !gameBoard[coord.first][coord.second].bomb) {
+                        currentMove = std::pair<unsigned, unsigned>{x, y};
+                        revealCell(coord.first, coord.second);
+                        return 3; // AI cannot guess, use behind the scenes knowledge
+                    }
                 }
             }
         }

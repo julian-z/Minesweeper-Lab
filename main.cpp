@@ -1,4 +1,4 @@
-// main.cpp -- Julian Zulfikar, 2022
+// main.cpp -- Julian Zulfikar, 2023
 // ------------------------------------------------------
 // SDL (GUI) implementation of Minesweeper Lab.
 
