@@ -14,12 +14,14 @@
 #include <SQLite/sqlite3.h>
 #include "SQLHelpers.hpp"
 
-#include "Minesweeper.hpp"
+#include "MinesweeperAI.hpp"
 
 
 class Tutorial 
 {
 private:
+    SDL_Texture* AIoutline = nullptr;
+
     SDL_Texture* logo = nullptr;
     SDL_Texture* shadow = nullptr;
     SDL_Texture* square = nullptr;
@@ -35,7 +37,7 @@ private:
     const unsigned rows = 8;
     const unsigned cols = 12;
     const unsigned bombs = 7;
-    Minesweeper game{rows, cols, bombs};
+    MinesweeperAI game{rows, cols, bombs};
 
     const int WIDTH = 800;
     const int HEIGHT = 600;
@@ -50,8 +52,9 @@ private:
         {8, "textures/8.png"}
     };
 
-    void drawGameBoardAll(const std::vector<std::vector<Minesweeper::Cell>>& board);
-    void drawGameBoard(const std::vector<std::vector<Minesweeper::Cell>>& board);
+    void drawGameBoardAll(const std::vector<std::vector<MinesweeperAI::Cell>>& board);
+    void drawGameBoard(const std::vector<std::vector<MinesweeperAI::Cell>>& board);
+    void drawMove(const std::pair<unsigned, unsigned>& move);
 
     void drawBackground(int add);
 
@@ -59,12 +62,12 @@ private:
 
 public:
     // Parameters are passed in from main.cpp, so we are able to render onto the window
-    Tutorial(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont, sqlite3* initDB);
+    Tutorial(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont);
 
-    // Clean up (font, window, renderer, and database are not our responsibility)
+    // Clean up (font, window, and renderer are not our responsibility)
     ~Tutorial();
 
-    // Returns "CLOSE" if user closed game, "NEW" if user chose new game, "BACK" if user returns to menu
+    // Returns "BACK" once user has finished tutorial
     std::string runTutorial();
 };
 

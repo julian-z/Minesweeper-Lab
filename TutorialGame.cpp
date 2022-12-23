@@ -5,9 +5,10 @@
 #include "TutorialGame.hpp"
 
 
-Tutorial::Tutorial(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont, sqlite3* initDB)
-: window{initWindow}, renderer{initRenderer}, windowEvent{initEvent}, font{initFont}, scoresDB{initDB}
+Tutorial::Tutorial(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont)
+: window{initWindow}, renderer{initRenderer}, windowEvent{initEvent}, font{initFont}
 {
+    AIoutline = IMG_LoadTexture(renderer, "textures/inspectingoutline.png");
     shadow = IMG_LoadTexture(renderer, "textures/boardshadow.png");
     square = IMG_LoadTexture(renderer, "textures/graysquare.png");
     flag = IMG_LoadTexture(renderer, "textures/graysquareflag.png");
@@ -18,6 +19,7 @@ Tutorial::Tutorial(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event
 
 Tutorial::~Tutorial()
 {
+    SDL_DestroyTexture(AIoutline);
     SDL_DestroyTexture(shadow);
     SDL_DestroyTexture(square);
     SDL_DestroyTexture(flag);
@@ -29,6 +31,8 @@ Tutorial::~Tutorial()
 std::string Tutorial::runTutorial()
 {
     int add = 0;
+
+    // Draw tutorial slideshow
     int currentPic = 1;
     SDL_Texture* buttonOverlaySlideshow = IMG_LoadTexture(renderer, "textures/tutorialbuttonhover.png");
     SDL_Texture* tutorialOne = IMG_LoadTexture(renderer, "textures/tutorial1.png");
@@ -36,7 +40,6 @@ std::string Tutorial::runTutorial()
     SDL_Texture* tutorialThree = IMG_LoadTexture(renderer, "textures/tutorial3.png");
     SDL_Texture* tutorialFour = IMG_LoadTexture(renderer, "textures/tutorial4.png");
     bool hoveringSlideshow = false;
-    // Draw tutorial slideshow
     while (currentPic < 5) 
     {
         while (SDL_PollEvent(&windowEvent)) {
@@ -98,6 +101,7 @@ std::string Tutorial::runTutorial()
     SDL_DestroyTexture(tutorialThree);
     SDL_DestroyTexture(tutorialFour);
 
+    // Run AI algorithm
     SDL_Texture* nextMove = IMG_LoadTexture(renderer, "textures/tutorialnextmove.png");
     SDL_Texture* nextMoveHover = IMG_LoadTexture(renderer, "textures/tutorialnextmovehover.png");
     bool gameInProgress = true;
@@ -111,34 +115,12 @@ std::string Tutorial::runTutorial()
             }
             else if (windowEvent.type == SDL_MOUSEBUTTONDOWN) {
                 if (gameInProgress) {
-                    // // Make move (or flag) on cell if mouse is in grid
-                    // if (windowEvent.button.button == SDL_BUTTON_LEFT) {
-                    //     if ( (100 <= windowEvent.motion.x && windowEvent.motion.x <= 700) && (100 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
-                    //         auto coords = getCellCoords(windowEvent.motion.x, windowEvent.motion.y);
-
-                    //         if (!game.move(coords.first, coords.second)) {
-                    //             gameInProgress = false;
-                    //         }
-                    //         else if (game.checkWin()) {
-                    //             gameInProgress = false;
-                    //         }
-                    //     }
-                    // }
-                    // else if (windowEvent.button.button == SDL_BUTTON_RIGHT) {
-                    //     if ( (100 <= windowEvent.motion.x && windowEvent.motion.x <= 700) && (100 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
-                    //         auto coords = getCellCoords(windowEvent.motion.x, windowEvent.motion.y);
-
-                    //         if (game.findFlag(coords.first, coords.second)) {
-                    //             game.removeFlag(coords.first, coords.second);
-                    //         }
-                    //         else {
-                    //             game.flag(coords.first, coords.second);
-                    //         }
-                    //     }
-                    // }
                     if ( (325 <= windowEvent.motion.x && windowEvent.motion.x <= 475) && (525 <= windowEvent.motion.y && windowEvent.motion.y <= 575) ) {
-                        // Clicked NEXT MOVE
-                        // ...
+                        auto og_board = game.getBoard();
+                        int rule = game.move();
+                        if (game.checkWin() || rule == -1) {
+                            gameInProgress = false;
+                        }
                     }
                 }
                 else if ( (325 <= windowEvent.motion.x && windowEvent.motion.x <= 475) && (450 <= windowEvent.motion.y && windowEvent.motion.y <= 500) ) {
@@ -168,13 +150,14 @@ std::string Tutorial::runTutorial()
         }
         SDL_RenderClear(renderer);
         drawBackground(add); // Checkerboard
-        SDL_Rect logo_rect{WIDTH/4, 0, 365, 100}; // Draw logo at top
-        SDL_RenderCopy(renderer, logo, NULL, &logo_rect);
 
         // ---------------------------------------
         if (gameInProgress) {
+            SDL_Rect logo_rect{WIDTH/4, 0, 365, 100}; // Draw logo at top
+            SDL_RenderCopy(renderer, logo, NULL, &logo_rect);
             SDL_RenderCopy(renderer, shadow, NULL, NULL);
             drawGameBoard(game.getBoard());
+            drawMove(game.getCurrentMove());
             SDL_RenderCopy(renderer, nextMove, NULL, NULL);
             if (hover) {
                 SDL_RenderCopy(renderer, nextMoveHover, NULL, NULL);
@@ -183,6 +166,7 @@ std::string Tutorial::runTutorial()
         else {
             SDL_RenderCopy(renderer, shadow, NULL, NULL);
             drawGameBoardAll(game.getBoard());
+            drawMove(game.getCurrentMove());
 
             SDL_Texture* overlay = IMG_LoadTexture(renderer, "textures/tutorialend.png");
             SDL_RenderCopy(renderer, overlay, NULL, NULL);
@@ -212,7 +196,7 @@ std::string Tutorial::runTutorial()
 // ------------------------------------------------------------
 
 
-void Tutorial::drawGameBoardAll(const std::vector<std::vector<Minesweeper::Cell>>& board) 
+void Tutorial::drawGameBoardAll(const std::vector<std::vector<MinesweeperAI::Cell>>& board) 
 {
     int size = 50;
     int start_x = 100;
@@ -265,7 +249,31 @@ void Tutorial::drawGameBoardAll(const std::vector<std::vector<Minesweeper::Cell>
 }
 
 
-void Tutorial::drawGameBoard(const std::vector<std::vector<Minesweeper::Cell>>& board) 
+void Tutorial::drawMove(const std::pair<unsigned, unsigned>& move)
+{
+    int size = 50;
+    int start_x = 100;
+    int x = start_x;
+    int y = 100;
+
+    for (int curX = 0; curX<8; ++curX) {
+        for (int curY = 0; curY<12; ++curY) {
+            if (move.first == curX && move.second == curY) {
+                // Draw outline
+                SDL_Rect square_rect{x, y, size, size};
+                SDL_RenderCopy(renderer, AIoutline, NULL, &square_rect);
+                return;
+            }
+
+            x += size;
+        }
+        x = start_x;
+        y += size;
+    }
+}
+
+
+void Tutorial::drawGameBoard(const std::vector<std::vector<MinesweeperAI::Cell>>& board) 
 {
     int size = 50;
     int start_x = 100;

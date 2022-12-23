@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
                     // Tutorial
                     bool running_tutorial = true;
                     while (running_tutorial) {
-                        Tutorial game(window, renderer, windowEvent, Pixelated, scoresDB);
+                        Tutorial game(window, renderer, windowEvent, Pixelated);
                         std::string choice = game.runTutorial();
                         if (choice == "CLOSE") {
                             running = false;
