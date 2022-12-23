@@ -32,3 +32,6 @@ SDL2 and SQLite are required for the application to run.
 - SDL2_ttf: https://github.com/libsdl-org/SDL_ttf
 - SDL2_image: https://github.com/libsdl-org/SDL_image
 - SQLite: https://www.sqlite.org/download.html
+
+# Conclusion
+Open to suggestions! Email me at jzulfika@uci.edu
