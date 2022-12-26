@@ -315,27 +315,44 @@ int MinesweeperAI::move()
             int num = gameBoard[x][y].num;
 
             if (num != 0 && !inspected.count(std::pair<unsigned, unsigned>{x, y}) && gameBoard[x][y].revealed) {
-                int numHidden = 0;
-                std::vector<std::pair<unsigned, unsigned>> hiddenCells;
-
+                // Prune if square is already finished; does not need to be inspected
+                int numFlagsInRadius = 0;
+                int numHiddenWithoutFlag = 0;
                 for (auto coord : getRadiusCoords(x, y)) {
-                    if (!gameBoard[coord.first][coord.second].revealed && !gameBoard[coord.first][coord.second].flag) {
-                        numHidden++;
-                        hiddenCells.push_back(coord);
+                    if (gameBoard[coord.first][coord.second].flag) {
+                        numFlagsInRadius++;
                     }
-                    else if (!gameBoard[coord.first][coord.second].revealed && gameBoard[coord.first][coord.second].flag) {
-                        num--;
+                    else if (!gameBoard[coord.first][coord.second].revealed) {
+                        numHiddenWithoutFlag++;
                     }
                 }
 
-                if (numHidden == num) {
-                    for (auto coord : hiddenCells) {
-                        flag(coord.first, coord.second);
-                        inspected.insert(std::pair<unsigned, unsigned>{x, y});
+                if (numHiddenWithoutFlag == 0 && numFlagsInRadius == num) {
+                    inspected.insert(std::pair<unsigned, unsigned>{x, y});
+                }
+                else {
+                    int numHidden = 0;
+                    std::vector<std::pair<unsigned, unsigned>> hiddenCells;
+
+                    for (auto coord : getRadiusCoords(x, y)) {
+                        if (!gameBoard[coord.first][coord.second].revealed && !gameBoard[coord.first][coord.second].flag) {
+                            numHidden++;
+                            hiddenCells.push_back(coord);
+                        }
+                        else if (!gameBoard[coord.first][coord.second].revealed && gameBoard[coord.first][coord.second].flag) {
+                            num--;
+                        }
                     }
-                    currentMove = std::pair<unsigned, unsigned>{x, y};
-                    inspected.insert(currentMove);
-                    return 1;
+
+                    if (numHidden == num) {
+                        for (auto coord : hiddenCells) {
+                            flag(coord.first, coord.second);
+                            inspected.insert(std::pair<unsigned, unsigned>{x, y});
+                        }
+                        currentMove = std::pair<unsigned, unsigned>{x, y};
+                        inspected.insert(currentMove);
+                        return 1;
+                    }
                 }
             }
         }
@@ -347,25 +364,42 @@ int MinesweeperAI::move()
             int num = gameBoard[x][y].num;
 
             if (num != 0 && !inspected.count(std::pair<unsigned, unsigned>{x, y}) && gameBoard[x][y].revealed) {
-                int numFlags = 0;
-                std::vector<std::pair<unsigned, unsigned>> hiddenCells;
-
+                // Prune if square is already finished; does not need to be inspected
+                int numFlagsInRadius = 0;
+                int numHiddenWithoutFlag = 0;
                 for (auto coord : getRadiusCoords(x, y)) {
                     if (gameBoard[coord.first][coord.second].flag) {
-                        numFlags++;
+                        numFlagsInRadius++;
                     }
                     else if (!gameBoard[coord.first][coord.second].revealed) {
-                        hiddenCells.push_back(coord);
+                        numHiddenWithoutFlag++;
                     }
                 }
 
-                if (numFlags == num) {
-                    for (auto coord : hiddenCells) {
-                        move(coord.first, coord.second);
+                if (numHiddenWithoutFlag == 0 && numFlagsInRadius == num) {
+                    inspected.insert(std::pair<unsigned, unsigned>{x, y});
+                }
+                else {
+                    int numFlags = 0;
+                    std::vector<std::pair<unsigned, unsigned>> hiddenCells;
+
+                    for (auto coord : getRadiusCoords(x, y)) {
+                        if (gameBoard[coord.first][coord.second].flag) {
+                            numFlags++;
+                        }
+                        else if (!gameBoard[coord.first][coord.second].revealed) {
+                            hiddenCells.push_back(coord);
+                        }
                     }
-                    currentMove = std::pair<unsigned, unsigned>{x, y};
-                    inspected.insert(currentMove);
-                    return 2;
+
+                    if (numFlags == num) {
+                        for (auto coord : hiddenCells) {
+                            move(coord.first, coord.second);
+                        }
+                        currentMove = std::pair<unsigned, unsigned>{x, y};
+                        inspected.insert(currentMove);
+                        return 2;
+                    }
                 }
             }
         }

@@ -71,6 +71,7 @@ int main(int argc, char *argv[])
     // ---------------------------------------
     sqlite3* scoresDB;
     // sqlite3_open("scoresdev.db", &scoresDB); // DEVELOPER MODE
+    // std::cout << "DEVELOPER NOTE: Remember to switch back to scores.db before pushing" << std::endl;
     sqlite3_open("scores.db", &scoresDB); // LOCAL PLAYER
 
     SDL_Init(SDL_INIT_EVERYTHING);
