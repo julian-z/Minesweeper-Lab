@@ -67,7 +67,27 @@ std::string Four::runFour()
                                 SDL_RenderPresent(renderer);
                                 SDL_Delay(500);
 
+                                // Reset 4x4
                                 game.reset(2);
+                                auto gameBoard = game.getBoard();
+
+                                // Find a zero to reveal as first move
+                                while (true) {
+                                    for (unsigned x=0; x<4; ++x) {
+                                        for (unsigned y=0; y<4; ++y) {
+                                            if (gameBoard[x][y].num == 0 && !gameBoard[x][y].bomb) {
+                                                game.move(x, y);
+                                            }
+                                        }
+                                    }
+
+                                    if (!game.checkWin()) {
+                                        break;
+                                    }
+                                    else {
+                                        game.reset(2);
+                                    }
+                                }
                             }
                             else if (game.checkWin()) {
                                 solvedCount++;
@@ -82,7 +102,27 @@ std::string Four::runFour()
                                 SDL_RenderPresent(renderer);
                                 SDL_Delay(500);
 
+                                // Reset 4x4
                                 game.reset(2);
+                                auto gameBoard = game.getBoard();
+
+                                // Find a zero to reveal as first move
+                                while (true) {
+                                    for (unsigned x=0; x<4; ++x) {
+                                        for (unsigned y=0; y<4; ++y) {
+                                            if (gameBoard[x][y].num == 0 && !gameBoard[x][y].bomb) {
+                                                game.move(x, y);
+                                            }
+                                        }
+                                    }
+
+                                    if (!game.checkWin()) {
+                                        break;
+                                    }
+                                    else {
+                                        game.reset(2);
+                                    }
+                                }
                             }
                         }
                     }

@@ -70,9 +70,10 @@ int main(int argc, char *argv[])
     // Initialization
     // ---------------------------------------
     sqlite3* scoresDB;
-    // sqlite3_open("scoresdev.db", &scoresDB); // DEVELOPER MODE
-    // std::cout << "DEVELOPER NOTE: Remember to switch back to scores.db before pushing" << std::endl;
     sqlite3_open("scores.db", &scoresDB); // LOCAL PLAYER
+    // sqlite3_open("scoresdev.db", &scoresDB); // DEVELOPER MODE
+    // std::cout << "-------------------------------------------------------------------\nDEVELOPER NOTE: Remember to switch back to scores.db before pushing";
+    // std::cout << std::endl << "-------------------------------------------------------------------" << std::endl;
 
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window* window = SDL_CreateWindow("Minesweeper Lab", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
