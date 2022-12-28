@@ -7,7 +7,7 @@ Minesweeper Lab is a recreation of the 1989 puzzle game, Minesweeper. In this ve
 ![](https://github.com/julian-z/Minesweeper-Lab/blob/main/gifs/menu.png)
 
 # Tutorial (AI)
-Don't quite know how to play Minesweeper? Don't sweat it! Minesweeper Lab comes with a tutorial. The slideshow explains the goal of the game and how to read the numbers throughout the puzzle. After the slideshow, an AI algorithm plays for you so that you are able to follow along.
+Don't quite know how to play Minesweeper? Don't sweat it! Minesweeper Lab comes with a tutorial. The slideshow explains the goal of the game and how to read the numbers throughout the puzzle. After the slideshow, an AI algorithm plays for you so that you are able to follow along. Each move has an explanation as to why the AI performed it.
 
 ![](https://github.com/julian-z/Minesweeper-Lab/blob/main/gifs/tutorial.gif)
 

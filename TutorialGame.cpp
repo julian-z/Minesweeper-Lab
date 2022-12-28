@@ -8,9 +8,15 @@
 Tutorial::Tutorial(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont)
 : window{initWindow}, renderer{initRenderer}, windowEvent{initEvent}, font{initFont}
 {
+    ruleneg1 = IMG_LoadTexture(renderer, "textures/ruleneg1.png");
+    rule1 = IMG_LoadTexture(renderer, "textures/rule1.png");
+    rule2 = IMG_LoadTexture(renderer, "textures/rule2.png");
+    rule3 = IMG_LoadTexture(renderer, "textures/rule3.png");
+
     AIglowgreen = IMG_LoadTexture(renderer, "textures/inspectingglowgreen.png");
     AIglow = IMG_LoadTexture(renderer, "textures/inspectingglow.png");
     AIoutline = IMG_LoadTexture(renderer, "textures/inspectingoutline.png");
+
     shadow = IMG_LoadTexture(renderer, "textures/boardshadow.png");
     square = IMG_LoadTexture(renderer, "textures/graysquare.png");
     flag = IMG_LoadTexture(renderer, "textures/graysquareflag.png");
@@ -21,9 +27,15 @@ Tutorial::Tutorial(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event
 
 Tutorial::~Tutorial()
 {
+    SDL_DestroyTexture(ruleneg1);
+    SDL_DestroyTexture(rule1);
+    SDL_DestroyTexture(rule2);
+    SDL_DestroyTexture(rule3);
+
     SDL_DestroyTexture(AIglowgreen);
     SDL_DestroyTexture(AIglow);
     SDL_DestroyTexture(AIoutline);
+
     SDL_DestroyTexture(shadow);
     SDL_DestroyTexture(square);
     SDL_DestroyTexture(flag);
@@ -110,6 +122,7 @@ std::string Tutorial::runTutorial()
     SDL_Texture* nextMoveHover = IMG_LoadTexture(renderer, "textures/tutorialnextmovehover.png");
     bool gameInProgress = true;
     bool hover = false;
+    int rule = -1;
     while (true)
     {
         while (SDL_PollEvent(&windowEvent)) {
@@ -121,7 +134,7 @@ std::string Tutorial::runTutorial()
                 if (gameInProgress) {
                     if ( (325 <= windowEvent.motion.x && windowEvent.motion.x <= 475) && (525 <= windowEvent.motion.y && windowEvent.motion.y <= 575) ) {
                         auto og_board = game.getBoard();
-                        int rule = game.move();
+                        rule = game.move();
 
                         // std::cout << rule << std::endl;
 
@@ -160,8 +173,26 @@ std::string Tutorial::runTutorial()
 
         // ---------------------------------------
         if (gameInProgress) {
-            SDL_Rect logo_rect{WIDTH/4, 0, 365, 100}; // Draw logo at top
-            SDL_RenderCopy(renderer, logo, NULL, &logo_rect);
+            // SDL_Rect logo_rect{WIDTH/4, 0, 365, 100}; // Draw logo at top
+            // SDL_RenderCopy(renderer, logo, NULL, &logo_rect);
+
+            // Draw rule (move) of AI
+            switch (rule)
+            {
+            case 1:
+                SDL_RenderCopy(renderer, rule1, NULL, NULL);
+                break;
+            case 2:
+                SDL_RenderCopy(renderer, rule2, NULL, NULL);
+                break;
+            case 3:
+                SDL_RenderCopy(renderer, rule3, NULL, NULL);
+                break;
+            default:
+                SDL_RenderCopy(renderer, ruleneg1, NULL, NULL);
+                break;
+            }
+
             SDL_RenderCopy(renderer, shadow, NULL, NULL);
             drawGameBoard(game.getBoard());
             drawMove(game.getCurrentMove());

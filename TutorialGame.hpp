@@ -20,6 +20,11 @@
 class Tutorial 
 {
 private:
+    SDL_Texture* ruleneg1 = nullptr;
+    SDL_Texture* rule1 = nullptr;
+    SDL_Texture* rule2 = nullptr;
+    SDL_Texture* rule3 = nullptr;
+
     SDL_Texture* AIoutline = nullptr;
     SDL_Texture* AIglow = nullptr;
     SDL_Texture* AIglowgreen = nullptr;
@@ -38,7 +43,7 @@ private:
 
     const unsigned rows = 8;
     const unsigned cols = 12;
-    const unsigned bombs = 8;
+    const unsigned bombs = 12;
     MinesweeperAI game{rows, cols, bombs};
 
     const int WIDTH = 800;
