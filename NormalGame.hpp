@@ -25,6 +25,9 @@ private:
     SDL_Texture* square = nullptr;
     SDL_Texture* flag = nullptr;
     SDL_Texture* bomb = nullptr;
+    
+    SDL_Texture* backButton = nullptr;
+    SDL_Texture* backButtonHover = nullptr;
 
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;

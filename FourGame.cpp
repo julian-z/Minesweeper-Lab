@@ -16,6 +16,9 @@ Four::Four(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEve
     flag = IMG_LoadTexture(renderer, "textures/graysquareflag.png");
     bomb = IMG_LoadTexture(renderer, "textures/graysquarebomb.png");
     logo = IMG_LoadTexture(renderer, "textures/minesweeperlablogo.png");
+
+    backButton = IMG_LoadTexture(renderer, "textures/backbutton.png");
+    backButtonHover = IMG_LoadTexture(renderer, "textures/backbuttonhover.png");
 }
 
 
@@ -27,6 +30,9 @@ Four::~Four()
     SDL_DestroyTexture(flag);
     SDL_DestroyTexture(bomb);
     SDL_DestroyTexture(logo);
+    
+    SDL_DestroyTexture(backButtonHover);
+    SDL_DestroyTexture(backButton);
 }
 
 
@@ -65,6 +71,7 @@ std::string Four::runFour()
                                 SDL_RenderCopy(renderer, shadow, NULL, NULL);
                                 drawGameBoardAll(game.getBoard());
                                 drawStats(startTick, solvedCount);
+                                SDL_RenderCopy(renderer, backButton, NULL, NULL);
 
                                 SDL_RenderPresent(renderer);
                                 SDL_Delay(500);
@@ -105,6 +112,7 @@ std::string Four::runFour()
                                 SDL_RenderCopy(renderer, shadow, NULL, NULL);
                                 drawGameBoardAll(game.getBoard());
                                 drawStats(startTick, solvedCount);
+                                SDL_RenderCopy(renderer, backButton, NULL, NULL);
                                 
                                 SDL_RenderPresent(renderer);
                                 SDL_Delay(500);
@@ -149,21 +157,34 @@ std::string Four::runFour()
                 else if ( (200 <= windowEvent.motion.x && windowEvent.motion.x <= 600) && (250 <= windowEvent.motion.y && windowEvent.motion.y <= 400) ) {
                     return "NEW"; // Start new game
                 }
-                else if ( (0 <= windowEvent.motion.x && windowEvent.motion.x <= 100) && (0 <= windowEvent.motion.y && windowEvent.motion.y <= 100) ) {
+
+                // Back Button was clicked by user
+                if ( (0 <= windowEvent.motion.x && windowEvent.motion.x <= 100) && (0 <= windowEvent.motion.y && windowEvent.motion.y <= 100) ) {
                     return "BACK"; // Return to menu
                 }
             }
-            else if (!gameInProgress && windowEvent.type == SDL_MOUSEMOTION) {
-                if ( (200 <= windowEvent.motion.x && windowEvent.motion.x <= 600) && (250 <= windowEvent.motion.y && windowEvent.motion.y <= 400) ) {
-                    // Hovering over new
-                    hover = 1;
-                }
-                else if ( (0 <= windowEvent.motion.x && windowEvent.motion.x <= 100) && (0 <= windowEvent.motion.y && windowEvent.motion.y <= 100) ) {
-                    // Hovering over back
-                    hover = 2;
+            else if (windowEvent.type == SDL_MOUSEMOTION) {
+                if (!gameInProgress) {
+                    if ( (200 <= windowEvent.motion.x && windowEvent.motion.x <= 600) && (250 <= windowEvent.motion.y && windowEvent.motion.y <= 400) ) {
+                        // Hovering over new
+                        hover = 1;
+                    }
+                    else if ( (0 <= windowEvent.motion.x && windowEvent.motion.x <= 100) && (0 <= windowEvent.motion.y && windowEvent.motion.y <= 100) ) {
+                        // Hovering over back
+                        hover = 2;
+                    }
+                    else {
+                        hover = 0;
+                    }
                 }
                 else {
-                    hover = 0;
+                    if ( (0 <= windowEvent.motion.x && windowEvent.motion.x <= 100) && (0 <= windowEvent.motion.y && windowEvent.motion.y <= 100) ) {
+                        // Hovering over back (game in progress)
+                        hover = 3;
+                    }
+                    else {
+                        hover = 0;
+                    }
                 }
             }
         }
@@ -192,6 +213,12 @@ std::string Four::runFour()
             SDL_RenderCopy(renderer, shadow, NULL, NULL);
             drawGameBoard(game.getBoard());
             drawStats(startTick, solvedCount);
+
+            // Draw back button
+            SDL_RenderCopy(renderer, backButton, NULL, NULL);
+            if (hover == 3) {
+                SDL_RenderCopy(renderer, backButtonHover, NULL, NULL);
+            }
         }
         else {
             if (win) {
