@@ -3,6 +3,8 @@
 // 4x4 gamemode definitions.
 
 #include "FourGame.hpp"
+#include <cstdlib>
+#include <ctime>
 
 
 Four::Four(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont, sqlite3* initDB)
@@ -67,8 +69,13 @@ std::string Four::runFour()
                                 SDL_RenderPresent(renderer);
                                 SDL_Delay(500);
 
-                                // Reset 4x4
-                                game.reset(2);
+                                // Reset 4x4, choose random bomb count from 1-4
+                                srand((int)time(0));
+                                int randBomb = rand() % 5;
+                                if (randBomb == 0) {
+                                    randBomb++;
+                                }
+                                game.reset(randBomb);
                                 auto gameBoard = game.getBoard();
 
                                 // Find a zero to reveal as first move
@@ -85,7 +92,7 @@ std::string Four::runFour()
                                         break;
                                     }
                                     else {
-                                        game.reset(2);
+                                        game.reset(randBomb);
                                     }
                                 }
                             }
