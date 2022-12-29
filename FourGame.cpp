@@ -74,13 +74,13 @@ std::string Four::runFour()
                                 SDL_RenderCopy(renderer, backButton, NULL, NULL);
 
                                 SDL_RenderPresent(renderer);
-                                SDL_Delay(500);
+                                SDL_Delay(250);
 
-                                // Reset 4x4, choose random bomb count from 1-4
+                                // Reset 4x4, choose random bomb count from 2-4
                                 srand((int)time(0));
                                 int randBomb = rand() % 5;
-                                if (randBomb == 0) {
-                                    randBomb++;
+                                if (randBomb < 2) {
+                                    randBomb = 2;
                                 }
                                 game.reset(randBomb);
                                 auto gameBoard = game.getBoard();
@@ -115,10 +115,15 @@ std::string Four::runFour()
                                 SDL_RenderCopy(renderer, backButton, NULL, NULL);
                                 
                                 SDL_RenderPresent(renderer);
-                                SDL_Delay(500);
+                                SDL_Delay(250);
 
-                                // Reset 4x4
-                                game.reset(2);
+                                // Reset 4x4, choose random bomb count from 1-4
+                                srand((int)time(0));
+                                int randBomb = rand() % 5;
+                                if (randBomb < 2) {
+                                    randBomb = 2;
+                                }
+                                game.reset(randBomb);
                                 auto gameBoard = game.getBoard();
 
                                 // Find a zero to reveal as first move
@@ -135,7 +140,7 @@ std::string Four::runFour()
                                         break;
                                     }
                                     else {
-                                        game.reset(2);
+                                        game.reset(randBomb);
                                     }
                                 }
                             }
