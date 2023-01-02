@@ -1,4 +1,4 @@
-// TimedGame.hpp -- Julian Zulfikar, 2022
+// TimedGame.hpp -- Julian Zulfikar, 2023
 // ------------------------------------------------------
 // Timed gamemode declarations.
 

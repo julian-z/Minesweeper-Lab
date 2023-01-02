@@ -1,9 +1,9 @@
-// TutorialGame.hpp -- Julian Zulfikar, 2023
+// UltimateGame.hpp -- Julian Zulfikar, 2023
 // ------------------------------------------------------
-// Tutorial gamemode declarations.
+// Ultimate gamemode declarations.
 
-#ifndef TUTORIAL_HPP
-#define TUTORIAL_HPP
+#ifndef ULTIMATE_HPP
+#define ULTIMATE_HPP
 
 #include <iostream>
 #include <unordered_map>
@@ -14,26 +14,20 @@
 #include <SQLite/sqlite3.h>
 #include "SQLHelpers.hpp"
 
-#include "MinesweeperAI.hpp"
+#include "Minesweeper.hpp"
 
 
-class Tutorial 
+class Ultimate 
 {
 private:
-    SDL_Texture* ruleneg1 = nullptr;
-    SDL_Texture* rule1 = nullptr;
-    SDL_Texture* rule2 = nullptr;
-    SDL_Texture* rule3 = nullptr;
-
-    SDL_Texture* AIoutline = nullptr;
-    SDL_Texture* AIglow = nullptr;
-    SDL_Texture* AIglowgreen = nullptr;
-
     SDL_Texture* logo = nullptr;
     SDL_Texture* shadow = nullptr;
     SDL_Texture* square = nullptr;
     SDL_Texture* flag = nullptr;
     SDL_Texture* bomb = nullptr;
+    
+    SDL_Texture* backButton = nullptr;
+    SDL_Texture* backButtonHover = nullptr;
 
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
@@ -41,10 +35,10 @@ private:
     TTF_Font* font = nullptr;
     sqlite3* scoresDB = nullptr;
 
-    const unsigned rows = 8;
-    const unsigned cols = 12;
-    const unsigned bombs = 12;
-    MinesweeperAI game{rows, cols, bombs};
+    const unsigned rows = 16;
+    const unsigned cols = 24;
+    const unsigned bombs = 99;
+    Minesweeper game{rows, cols, bombs};
 
     const int WIDTH = 800;
     const int HEIGHT = 600;
@@ -59,9 +53,11 @@ private:
         {8, "textures/8.png"}
     };
 
-    void drawGameBoardAll(const std::vector<std::vector<MinesweeperAI::Cell>>& board);
-    void drawGameBoard(const std::vector<std::vector<MinesweeperAI::Cell>>& board);
-    void drawMove(const std::pair<unsigned, unsigned>& move);
+    void drawStats(int startTick);
+    void drawStatsGameOver(int time);
+
+    // void drawGameBoardAll(const std::vector<std::vector<Minesweeper::Cell>>& board);
+    void drawGameBoard(const std::vector<std::vector<Minesweeper::Cell>>& board, const std::pair<int, int>& finalMove);
 
     void drawBackground(int add);
 
@@ -69,13 +65,13 @@ private:
 
 public:
     // Parameters are passed in from main.cpp, so we are able to render onto the window
-    Tutorial(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont);
+    Ultimate(SDL_Window* initWindow, SDL_Renderer* initRenderer, SDL_Event initEvent, TTF_Font* initFont, sqlite3* initDB);
 
-    // Clean up (font, window, and renderer are not our responsibility)
-    ~Tutorial();
+    // Clean up (font, window, renderer, and database are not our responsibility)
+    ~Ultimate();
 
-    // Returns "BACK" once user has finished tutorial
-    std::string runTutorial();
+    // Returns "CLOSE" if user closed game, "NEW" if user chose new game, "BACK" if user returns to menu
+    std::string runUltimate();
 };
 
 

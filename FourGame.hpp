@@ -1,4 +1,4 @@
-// FourGame.hpp -- Julian Zulfikar, 2022
+// FourGame.hpp -- Julian Zulfikar, 2023
 // ------------------------------------------------------
 // 4x4 gamemode declarations.
 

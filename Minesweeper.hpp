@@ -1,4 +1,4 @@
-// Minesweeper.hpp -- Julian Zulfikar, 2022
+// Minesweeper.hpp -- Julian Zulfikar, 2023
 // ------------------------------------------------------
 // Holds the game functionality; implemented with 2D
 // vectors. Definitions in Minesweeper.cpp.

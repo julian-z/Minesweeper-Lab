@@ -1,4 +1,4 @@
-// FourGame.cpp -- Julian Zulfikar, 2022
+// FourGame.cpp -- Julian Zulfikar, 2023
 // ------------------------------------------------------
 // 4x4 gamemode definitions.
 

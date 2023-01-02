@@ -14,6 +14,7 @@
 #include "Minesweeper.hpp"
 #include "TutorialGame.hpp"
 #include "NormalGame.hpp"
+#include "UltimateGame.hpp"
 #include "TimedGame.hpp"
 #include "FourGame.hpp"
 
@@ -106,7 +107,7 @@ int main(int argc, char *argv[])
             if (windowEvent.type == SDL_MOUSEBUTTONDOWN) {
 
                 // User selects a gamemode
-                if ( (450 <= windowEvent.motion.x && windowEvent.motion.x <= 650) && (150 <= windowEvent.motion.y && windowEvent.motion.y <= 300) ) {
+                if ( (450 <= windowEvent.motion.x && windowEvent.motion.x <= 550) && (150 <= windowEvent.motion.y && windowEvent.motion.y <= 300) ) {
                     // Normal
                     bool running_normal = true;
                     while (running_normal) {
@@ -118,6 +119,21 @@ int main(int argc, char *argv[])
                         }
                         else if (choice == "BACK") {
                             running_normal = false;
+                        }
+                    }
+                }
+                else if ( (550 <= windowEvent.motion.x && windowEvent.motion.x <= 650) && (150 <= windowEvent.motion.y && windowEvent.motion.y <= 300) ) {
+                    // Ultimate
+                    bool running_ultimate = true;
+                    while (running_ultimate) {
+                        Ultimate game(window, renderer, windowEvent, Pixelated, scoresDB);
+                        std::string choice = game.runUltimate();
+                        if (choice == "CLOSE") {
+                            running = false;
+                            running_ultimate = false;
+                        }
+                        else if (choice == "BACK") {
+                            running_ultimate = false;
                         }
                     }
                 }

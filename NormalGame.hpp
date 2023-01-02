@@ -1,4 +1,4 @@
-// NormalGame.hpp -- Julian Zulfikar, 2022
+// NormalGame.hpp -- Julian Zulfikar, 2023
 // ------------------------------------------------------
 // Normal gamemode declarations.
 

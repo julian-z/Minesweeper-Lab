@@ -1,4 +1,4 @@
-// MinesweeperAI.hpp -- Julian Zulfikar, 2022
+// MinesweeperAI.hpp -- Julian Zulfikar, 2023
 // ------------------------------------------------------
 // Modified game functionality for tutorial AI.
 //

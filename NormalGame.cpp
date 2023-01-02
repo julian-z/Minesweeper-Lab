@@ -1,4 +1,4 @@
-// NormalGame.cpp -- Julian Zulfikar, 2022
+// NormalGame.cpp -- Julian Zulfikar, 2023
 // ------------------------------------------------------
 // Normal gamemode definitions.
 

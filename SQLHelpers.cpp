@@ -1,4 +1,4 @@
-// SQLHelpers.cpp -- Julian Zulfikar, 2022
+// SQLHelpers.cpp -- Julian Zulfikar, 2023
 // ------------------------------------------------------
 // Helper functions for SQL commands.
 
