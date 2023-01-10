@@ -2,9 +2,9 @@
 Created by Julian Zulfikar, January 2023.
 
 # About
-Minesweeper Lab is a recreation of the 1989 puzzle game, Minesweeper. In this version, there includes a training aspect: 3x3 gamemode & timed trials. The program is built to help train the user to solve Minesweeper puzzles faster.
+Minesweeper Lab is a recreation of the 1989 puzzle game, Minesweeper. In this version, there includes a training aspect: 3x3 gamemode & timed trials. The program is built to help train the user to solve Minesweeper puzzles faster. Embedded in the image below is a demonstration video. (As of 1/10/23)
 
-![](https://www.youtube.com/watch?v=Fi9VODiHQNg)
+[![Minesweeper Lab Demo - Youtube](https://img.youtube.com/vi/Fi9VODiHQNg/0.jpg)](https://www.youtube.com/watch?v=Fi9VODiHQNg)
 
 # Tutorial (AI)
 Don't quite know how to play Minesweeper? Don't sweat it! Minesweeper Lab comes with a tutorial. The slideshow explains the goal of the game and how to read the numbers throughout the puzzle. After the slideshow, an AI algorithm plays for you so that you are able to follow along. Each move has an explanation as to why the AI performed it.
